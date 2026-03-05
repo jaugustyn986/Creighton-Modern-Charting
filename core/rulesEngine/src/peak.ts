@@ -33,28 +33,6 @@ export function detectPeak(
 
     if (c1 < candidateRank && c2 < candidateRank && c3 < candidateRank) {
       return { peakIndex: candidate, fertileEndIndex: candidate + 3 };
-    if (candidate !== null) {
-      const candidateRank = ranks[candidate];
-      if (candidateRank === null) {
-        candidate = null;
-        continue;
-      }
-
-      if (i > candidate && rank >= candidateRank) {
-        candidate = i;
-        continue;
-      }
-
-      const c1 = ranks[candidate + 1];
-      const c2 = ranks[candidate + 2];
-      const c3 = ranks[candidate + 3];
-
-      if (c1 === undefined || c2 === undefined || c3 === undefined) continue;
-      if (c1 === null || c2 === null || c3 === null) continue;
-
-      if (c1 < candidateRank && c2 < candidateRank && c3 < candidateRank) {
-        return { peakIndex: candidate, fertileEndIndex: candidate + 3 };
-      }
     }
   }
 

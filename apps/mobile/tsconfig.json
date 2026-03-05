@@ -3,6 +3,10 @@
     "strict": true,
     "jsx": "react-jsx",
     "moduleResolution": "Node",
-    "types": ["react", "react-native"]
-  }
+    "types": [
+      "react",
+      "react-native"
+    ]
+  },
+  "extends": "expo/tsconfig.base"
 }
