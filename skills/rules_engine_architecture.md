@@ -33,6 +33,14 @@ The engine performs:
 5. fertile window end detection
 6. phase labeling
 
+Multi-cycle layer (core/rulesEngine/src/multiCycle.ts):
+
+splitIntoCycles(entries) — splits sorted entries into individual CycleSlice objects by bleeding boundaries
+computeCycleSummary(cycles) — aggregate stats (avg length, peak day, luteal phase)
+generateInsights(cycles) — human-readable insight strings (requires 2+ completed cycles)
+
+These functions wrap recalculateCycle() without modifying it.
+
 The rules engine must never depend on:
 
 React

@@ -14,7 +14,7 @@ export function EngineDemoScreen(): JSX.Element {
           <View key={index} style={[styles.row, index === result.peakIndex ? styles.peakRow : undefined]}>
             <Text style={styles.text}>Day {index}</Text>
             <Text style={styles.text}>Rank {result.mucusRanks[index] ?? 'missing'}</Text>
-            <Text style={styles.text}>Phase {phase}</Text>
+            <Text style={styles.text}>{phase}</Text>
           </View>
         ))}
       </ScrollView>
@@ -27,5 +27,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '700', marginBottom: 12 },
   row: { padding: 10, borderBottomWidth: 1, borderColor: '#ddd' },
   peakRow: { backgroundColor: '#fce7f3' },
-  text: { fontSize: 14 }
+  text: { fontSize: 14 },
 });

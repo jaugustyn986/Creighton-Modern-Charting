@@ -1,0 +1,15 @@
+{
+  "entries": [
+    { "bleeding": "none", "mucusRankOverride": 3 },
+    { "bleeding": "none", "mucusRankOverride": 1 },
+    { "bleeding": "heavy", "mucusRankOverride": 0 },
+    { "bleeding": "moderate", "mucusRankOverride": 0 },
+    { "bleeding": "none", "mucusRankOverride": 1 }
+  ],
+  "expected": {
+    "fertileStartIndex": 4,
+    "peakIndex": null,
+    "fertileEndIndex": null,
+    "phaseLabels": ["previous_cycle", "previous_cycle", "dry", "dry", "fertile_unconfirmed_peak"]
+  }
+}

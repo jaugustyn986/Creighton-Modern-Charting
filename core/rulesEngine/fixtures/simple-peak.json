@@ -8,5 +8,11 @@
     { "bleeding": "none", "mucusRankOverride": 0 },
     { "bleeding": "none", "mucusRankOverride": 0 },
     { "bleeding": "none", "mucusRankOverride": 0 }
-  ]
+  ],
+  "expected": {
+    "fertileStartIndex": 2,
+    "peakIndex": 4,
+    "fertileEndIndex": 7,
+    "phaseLabels": ["dry", "dry", "fertile_open", "fertile_open", "peak_confirmed", "p_plus_1", "p_plus_2", "p_plus_3"]
+  }
 }

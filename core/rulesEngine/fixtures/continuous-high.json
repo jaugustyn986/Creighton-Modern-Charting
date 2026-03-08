@@ -1,0 +1,16 @@
+{
+  "entries": [
+    { "bleeding": "none", "mucusRankOverride": 0 },
+    { "bleeding": "none", "mucusRankOverride": 1 },
+    { "bleeding": "none", "mucusRankOverride": 3 },
+    { "bleeding": "none", "mucusRankOverride": 3 },
+    { "bleeding": "none", "mucusRankOverride": 3 },
+    { "bleeding": "none", "mucusRankOverride": 3 }
+  ],
+  "expected": {
+    "fertileStartIndex": 1,
+    "peakIndex": null,
+    "fertileEndIndex": null,
+    "phaseLabels": ["dry", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak"]
+  }
+}

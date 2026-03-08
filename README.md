@@ -32,11 +32,29 @@ node ./core/rulesEngine/dist/bin/cli.js --fixture core/rulesEngine/fixtures/simp
 npm run start:mobile
 ```
 
-## Rules engine source of truth
-See [docs/RULES_ENGINE_SPEC.md](docs/RULES_ENGINE_SPEC.md).
+## Documentation
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/prd.md](docs/prd.md) | Product Requirements Document — features, specs, implementation log |
+| [docs/RULES_ENGINE_SPEC.md](docs/RULES_ENGINE_SPEC.md) | Rules engine source of truth — ranking, peak detection, multi-cycle layer |
+| [docs/CREIGHTON.md](docs/CREIGHTON.md) | Creighton Method reference — recording codes, sticker colors, compliance |
+| [docs/mockups.md](docs/mockups.md) | Text wireframes and screenshot references |
+
+## App screens
+
+- **Calendar** — monthly grid with Creighton-aligned colors (red=bleeding, green=dry, blue dot=peak-type, yellow=post-peak). Multi-cycle aware.
+- **Daily Entry** — observation form (sensation, appearance, quantity, bleeding, intercourse, notes)
+- **Cycle History** — summary stats, pattern insights, peak-aligned overlay, cycle cards
+- **Cycle Detail** — per-cycle mucus chart, fertile timeline, daily log
+- **Help** — charting guide, calendar color key, onboarding replay
+- **Onboarding** — 4-slide first-launch flow
 
 ## Notes
 - Multiple observations per day are supported; daily rank is max observation rank.
+- Multi-cycle engine (`core/rulesEngine/src/multiCycle.ts`) splits entries into individual cycles and computes aggregate stats/insights.
+- All UI colors are centralized in `apps/mobile/src/theme/colors.ts`.
+- Intercourse is marked with a rose emoji (🌹) across the app.
 - RevenueCat and Supabase integration are scaffolded as placeholders only.
 - TODO: Manual override for trained users.
 

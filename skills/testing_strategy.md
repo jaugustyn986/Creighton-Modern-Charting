@@ -13,6 +13,10 @@ continuous high-quality mucus
 missing days
 gradual decline after peak
 recalculation after edits
+bleeding reset (cycle boundary)
+multi-cycle splitting (splitIntoCycles)
+cycle summary aggregation (computeCycleSummary)
+insight generation (generateInsights)
 
 Tests must run automatically in CI.
 

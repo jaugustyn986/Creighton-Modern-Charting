@@ -33,5 +33,6 @@ function computeObservationRank(observation: Observation): number {
   }
   if (observation.sensation === 'wet') return 2;
   if (observation.sensation === 'damp') return 1;
+  if (observation.appearance !== 'none') return 1;
   return 0;
 }

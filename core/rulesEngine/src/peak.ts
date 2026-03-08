@@ -19,11 +19,6 @@ export function detectPeak(
 
     const candidateRank = ranks[candidate]!;
 
-    if (i > candidate && rank >= candidateRank) {
-      candidate = i;
-      continue;
-    }
-
     const c1 = ranks[candidate + 1];
     const c2 = ranks[candidate + 2];
     const c3 = ranks[candidate + 3];

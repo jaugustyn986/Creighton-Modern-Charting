@@ -1,4 +1,4 @@
 import { registerRootComponent } from 'expo';
-import { EngineDemoScreen } from './src/screens/EngineDemoScreen';
+import { AppNavigator } from './src/navigation/AppNavigator';
 
-registerRootComponent(EngineDemoScreen);
+registerRootComponent(AppNavigator);

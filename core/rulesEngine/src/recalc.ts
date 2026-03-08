@@ -1,22 +1,28 @@
 import { detectFertileStart } from './fertileWindow';
 import { detectPeak } from './peak';
 import { computeMucusRank } from './rank';
-import { CycleResult, DailyEntry } from './types';
+import { CycleResult, DailyEntry, PhaseLabel } from './types';
 
 interface RecalcOptions {
   debug?: boolean;
 }
 
+/**
+ * Find the start of the most recent cycle by locating the last occurrence
+ * of heavy or moderate bleeding. Per Creighton rules, a new cycle begins
+ * on the first day of menstruation (heavy/moderate bleeding).
+ */
 function findCurrentCycleStart(entries: Array<DailyEntry | null>): number {
   let startIndex = 0;
-  for (let i = 0; i < entries.length - 1; i += 1) {
+  for (let i = 0; i < entries.length; i += 1) {
     const bleeding = entries[i]?.bleeding;
-    const nextBleeding = entries[i + 1]?.bleeding;
-    const currentIsCycleStart = (bleeding === 'heavy' || bleeding === 'moderate') &&
-      (nextBleeding === 'heavy' || nextBleeding === 'moderate');
-
-    if (currentIsCycleStart) {
-      startIndex = i;
+    if (bleeding === 'heavy' || bleeding === 'moderate') {
+      const prevBleeding = i > 0 ? entries[i - 1]?.bleeding : undefined;
+      const prevIsHeavyOrModerate =
+        prevBleeding === 'heavy' || prevBleeding === 'moderate';
+      if (!prevIsHeavyOrModerate) {
+        startIndex = i;
+      }
     }
   }
   return startIndex;
@@ -27,15 +33,19 @@ function findCurrentCycleStart(entries: Array<DailyEntry | null>): number {
  * Recompute whole cycle on every edit. Predictive behavior is forbidden.
  */
 export function recalculateCycle(entries: Array<DailyEntry | null>, options: RecalcOptions = {}): CycleResult {
-  const phaseLabels = new Array(entries.length).fill('dry');
+  const phaseLabels: PhaseLabel[] = new Array(entries.length).fill('dry');
   const mucusRanks = entries.map((entry) => computeMucusRank(entry));
   const cycleStartIndex = findCurrentCycleStart(entries);
 
   const fertileStartIndex = detectFertileStart(mucusRanks, cycleStartIndex);
   const { peakIndex, fertileEndIndex } = detectPeak(mucusRanks, cycleStartIndex);
 
+  const hasFertileWindow = fertileStartIndex !== null;
+  const peakConfirmed = peakIndex !== null && fertileEndIndex !== null;
+
   for (let i = 0; i < entries.length; i += 1) {
     const rank = mucusRanks[i];
+
     if (i < cycleStartIndex) {
       phaseLabels[i] = 'previous_cycle';
       continue;
@@ -46,11 +56,26 @@ export function recalculateCycle(entries: Array<DailyEntry | null>, options: Rec
       continue;
     }
 
-    phaseLabels[i] = rank >= 1 ? 'mucus' : 'dry';
-
-    if (peakIndex !== null && i === peakIndex) phaseLabels[i] = 'peak';
-    if (fertileStartIndex !== null && fertileEndIndex !== null && i >= fertileStartIndex && i <= fertileEndIndex) {
-      phaseLabels[i] = i === peakIndex ? 'peak' : 'fertile';
+    if (peakConfirmed) {
+      if (i < fertileStartIndex!) {
+        phaseLabels[i] = 'dry';
+      } else if (i < peakIndex!) {
+        phaseLabels[i] = 'fertile_open';
+      } else if (i === peakIndex) {
+        phaseLabels[i] = 'peak_confirmed';
+      } else if (i === peakIndex! + 1) {
+        phaseLabels[i] = 'p_plus_1';
+      } else if (i === peakIndex! + 2) {
+        phaseLabels[i] = 'p_plus_2';
+      } else if (i === peakIndex! + 3) {
+        phaseLabels[i] = 'p_plus_3';
+      } else if (i > fertileEndIndex!) {
+        phaseLabels[i] = 'post_peak';
+      }
+    } else if (hasFertileWindow && i >= fertileStartIndex!) {
+      phaseLabels[i] = 'fertile_unconfirmed_peak';
+    } else {
+      phaseLabels[i] = 'dry';
     }
   }
 

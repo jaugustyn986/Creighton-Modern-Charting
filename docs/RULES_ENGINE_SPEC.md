@@ -8,7 +8,8 @@ Given a daily entry or observation:
 2. If `sensation == slippery` OR `appearance == clear` OR `appearance == stretchy` => rank `3`.
 3. If `sensation == wet` => rank `2`.
 4. If `sensation == damp` => rank `1`.
-5. Else => rank `0`.
+5. If `appearance` is not `none` (any visible mucus) => rank `1`.
+6. Else => rank `0`.
 
 If multiple observations exist in one day, daily rank is the `max(observationRanks)`.
 
@@ -34,7 +35,8 @@ If multiple observations exist in one day, daily rank is the `max(observationRan
 - Missing days block peak confirmation where relevant.
 
 ## Bleeding Reset Rule
-- If heavy/moderate bleeding occurs and is followed by heavy/moderate bleeding on next day, treat that point as a new cycle start.
+- A new cycle begins on the first day of heavy or moderate bleeding that is not a continuation of an existing heavy/moderate bleeding sequence.
+- Days before the most recent cycle start are labeled `previous_cycle`.
 
 ## Output Requirements
 `CycleResult` must include:
@@ -277,6 +279,63 @@ These examples serve as canonical test cases. The engineering implementation mus
 **Explanation:** Editing past entries must trigger full recalculation.
 
 ---
+
+### Example 9 — Bleeding Reset (Cycle Boundary)
+
+**Purpose:** Verify that heavy/moderate bleeding resets the cycle start and labels earlier days as `previous_cycle`.
+
+**Input (mid-cycle reset)**
+
+| Day | Bleeding | Rank |
+|-----|----------|------|
+| 1   | none     | 3    |
+| 2   | none     | 1    |
+| 3   | heavy    | 0    |
+| 4   | moderate | 0    |
+| 5   | none     | 1    |
+
+**Expected Output**
+
+- Days 1-2 labeled `previous_cycle`
+- Cycle starts at day 3
+- `fertileStartIndex` = 5
+
+**Explanation:** Heavy bleeding on day 3 (not preceded by heavy/moderate) triggers a new cycle start. Days before the cycle start are labeled `previous_cycle`.
+
+---
+
+## Notes
+
+- `mucusRankOverride` on `DailyEntry` is a test/fixture-only field that bypasses the sensation/appearance rank calculation. It must not be exposed in any user-facing interface.
+
+## Multi-Cycle Layer
+
+The rules engine includes a multi-cycle utility module (`core/rulesEngine/src/multiCycle.ts`) that builds on top of the single-cycle `recalculateCycle()` function. It does **not** modify the core rules engine.
+
+### Functions
+
+- **`splitIntoCycles(entries)`** — Takes a flat, date-sorted array of `DailyEntry` objects and splits them into individual `CycleSlice` objects. A new cycle starts on the first day of heavy or moderate bleeding that is not a continuation of an existing heavy/moderate bleeding sequence (same bleeding reset rule as the core engine).
+- **`computeCycleSummary(cycles)`** — Accepts an array of `CycleSlice` and returns aggregate statistics: total cycles tracked, average cycle length, average peak day, and average luteal phase.
+- **`generateInsights(cycles)`** — Accepts an array of `CycleSlice` (requires ≥ 2 completed cycles) and returns human-readable insight strings covering peak day range, typical fertile window start, luteal phase average, and cycle consistency.
+
+### CycleSlice interface
+
+Each `CycleSlice` contains:
+
+- `cycleNumber` — 1-indexed, oldest first
+- `startDate` / `endDate` — ISO date strings
+- `entries` — subset of `DailyEntry[]` for this cycle
+- `result` — `CycleResult` from `recalculateCycle()`
+- `length` — number of days
+- `peakDay` — cycle day number (1-indexed) or `null`
+- `lutealPhase` — days from peak+1 to next cycle start, or `null`
+- `status` — `'complete'` | `'in_progress'` | `'no_peak'`
+
+### Invariants
+
+- Multi-cycle functions are pure and deterministic.
+- They never mutate the input array.
+- They delegate all single-cycle logic to `recalculateCycle()`.
 
 ## Future TODO
 - Manual override support by trained user (not implemented in MVP).

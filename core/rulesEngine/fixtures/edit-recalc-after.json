@@ -3,15 +3,15 @@
     { "bleeding": "none", "mucusRankOverride": 0 },
     { "bleeding": "none", "mucusRankOverride": 1 },
     { "bleeding": "none", "mucusRankOverride": 3 },
-    { "missing": true },
-    { "bleeding": "none", "mucusRankOverride": 1 },
+    { "bleeding": "none", "mucusRankOverride": 3 },
+    { "bleeding": "none", "mucusRankOverride": 0 },
     { "bleeding": "none", "mucusRankOverride": 0 },
     { "bleeding": "none", "mucusRankOverride": 0 }
   ],
   "expected": {
     "fertileStartIndex": 1,
-    "peakIndex": null,
-    "fertileEndIndex": null,
-    "phaseLabels": ["dry", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak", "missing", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak", "fertile_unconfirmed_peak"]
+    "peakIndex": 3,
+    "fertileEndIndex": 6,
+    "phaseLabels": ["dry", "fertile_open", "fertile_open", "peak_confirmed", "p_plus_1", "p_plus_2", "p_plus_3"]
   }
 }

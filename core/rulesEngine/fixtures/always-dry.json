@@ -1,0 +1,15 @@
+{
+  "entries": [
+    { "sensation": "dry", "appearance": "none" },
+    { "sensation": "dry", "appearance": "none" },
+    { "sensation": "dry", "appearance": "none" },
+    { "sensation": "dry", "appearance": "none" },
+    { "sensation": "dry", "appearance": "none" }
+  ],
+  "expected": {
+    "fertileStartIndex": null,
+    "peakIndex": null,
+    "fertileEndIndex": null,
+    "phaseLabels": ["dry", "dry", "dry", "dry", "dry"]
+  }
+}
