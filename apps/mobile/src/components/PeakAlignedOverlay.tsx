@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CycleSlice } from '../../../../core/rulesEngine/src/multiCycle';
 import {
   BG_BLEEDING, BG_CARD, BG_DRY, BG_MISSING, BG_PEAK_TYPE, BG_POST_PEAK,
-  PEAK_ACCENT, FERTILE_ACCENT,
+  FERTILE_ACCENT, PEAK_BORDER,
   TEXT_PRIMARY, TEXT_MUTED, TEXT_SUBTLE,
   BORDER_CARD,
 } from '../theme/colors';
@@ -23,12 +23,12 @@ function getCellColor(rank: number | null, phase: string, bleeding: boolean): st
 
 function getCellDotColor(rank: number | null, phase: string, bleeding: boolean): string | null {
   if (bleeding) return null;
-  if (phase === 'peak_confirmed') return PEAK_ACCENT;
+  if (phase === 'peak_confirmed') return null;
   if (
     (phase === 'fertile_open' || phase === 'fertile_unconfirmed_peak') &&
     rank !== null
   ) {
-    if (rank >= 3) return PEAK_ACCENT;
+    if (rank >= 3) return null;
     if (rank >= 1) return FERTILE_ACCENT;
   }
   return null;
@@ -114,7 +114,7 @@ export function PeakAlignedOverlay({ cycles, onCyclePress }: Props): JSX.Element
         <LegendItem color={BG_BLEEDING} label="Bleeding" />
         <LegendItem color={BG_DRY} label="Dry" />
         <LegendItem color={BG_DRY} dotColor={FERTILE_ACCENT} label="Mucus" />
-        <LegendItem color={BG_PEAK_TYPE} dotColor={PEAK_ACCENT} label="Peak" />
+        <LegendItem color={BG_PEAK_TYPE} label="Peak" />
         <LegendItem color={BG_POST_PEAK} label="Post-peak" />
         <LegendItem color={BG_MISSING} label="No data" />
       </View>
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', marginBottom: 4 },
   headerCell: { width: 28, alignItems: 'center' },
   headerText: { fontSize: 10, color: TEXT_MUTED },
-  peakHeaderText: { color: PEAK_ACCENT, fontWeight: '700' },
+  peakHeaderText: { color: PEAK_BORDER, fontWeight: '700' },
   dataRow: { flexDirection: 'row', marginBottom: 3 },
   rowLabel: { width: 32, justifyContent: 'center' },
   rowLabelText: { fontSize: 11, color: TEXT_SUBTLE, fontWeight: '500' },
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     width: 26, height: 20, borderRadius: 4, marginHorizontal: 1,
     justifyContent: 'center', alignItems: 'center',
   },
-  peakCell: { borderWidth: 1.5, borderColor: PEAK_ACCENT },
+  peakCell: { borderWidth: 1.5, borderColor: PEAK_BORDER },
   cellDot: { width: 6, height: 6, borderRadius: 3 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 10, gap: 8 },
   legendItem: { flexDirection: 'row', alignItems: 'center' },

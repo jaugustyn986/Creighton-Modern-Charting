@@ -14,11 +14,11 @@ const byRanks = (ranks: Array<number | null>): Array<DailyEntry | null> =>
 describe('Spec Verification Examples', () => {
   it('Example 1 — Always Dry Cycle', () => {
     const entries: DailyEntry[] = [
-      { sensation: 'dry', appearance: 'none' },
-      { sensation: 'dry', appearance: 'none' },
-      { sensation: 'dry', appearance: 'none' },
-      { sensation: 'dry', appearance: 'none' },
-      { sensation: 'dry', appearance: 'none' },
+      { sensation: 'dry', appearances: [] },
+      { sensation: 'dry', appearances: [] },
+      { sensation: 'dry', appearances: [] },
+      { sensation: 'dry', appearances: [] },
+      { sensation: 'dry', appearances: [] },
     ];
     const result = recalculateCycle(entries);
     expect(result.fertileStartIndex).toBeNull();
@@ -29,13 +29,13 @@ describe('Spec Verification Examples', () => {
 
   it('Example 2 — Simple Fertile Cycle With Clear Peak', () => {
     const entries: DailyEntry[] = [
-      { sensation: 'dry', appearance: 'none' },
-      { sensation: 'damp', appearance: 'cloudy' },
-      { sensation: 'wet', appearance: 'cloudy' },
-      { sensation: 'slippery', appearance: 'clear' },
-      { sensation: 'damp', appearance: 'cloudy' },
-      { sensation: 'dry', appearance: 'none' },
-      { sensation: 'dry', appearance: 'none' },
+      { sensation: 'dry', appearances: [] },
+      { sensation: 'damp', appearances: ['cloudy'] },
+      { sensation: 'wet', appearances: ['cloudy'] },
+      { sensation: 'wet', appearances: ['clear', 'lubricative'] },
+      { sensation: 'damp', appearances: ['cloudy'] },
+      { sensation: 'dry', appearances: [] },
+      { sensation: 'dry', appearances: [] },
     ];
     const result = recalculateCycle(entries);
     expect(result.fertileStartIndex).toBe(1);

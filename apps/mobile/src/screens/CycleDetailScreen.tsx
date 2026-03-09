@@ -14,7 +14,6 @@ import {
   BG_CARD, BG_PAGE,
   TEXT_PRIMARY, TEXT_MUTED, TEXT_SECONDARY,
   BORDER_CARD, ACCENT_WARM,
-  PEAK_ACCENT,
 } from '../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CycleDetail'>;
@@ -40,8 +39,9 @@ export function CycleDetailScreen({ route, navigation }: Props): JSX.Element {
       const html = buildCyclePdfHtml(cycle, includeIntercourse);
       const { uri } = await Print.printToFileAsync({ html });
       await shareAsync(uri, { mimeType: 'application/pdf' });
-    } catch (e: any) {
-      Alert.alert('Export Failed', e?.message ?? 'An error occurred while exporting.');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'An error occurred while exporting.';
+      Alert.alert('Export Failed', msg);
     } finally {
       setExporting(false);
     }

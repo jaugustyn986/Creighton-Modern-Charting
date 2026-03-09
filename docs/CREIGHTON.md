@@ -94,29 +94,38 @@ How often during the day the most fertile sign was seen:
 
 ## 3. Code-to-App Field Mapping
 
-Our app uses simplified fields (sensation, appearance) rather than the full Creighton code notation. This table shows the mapping so that users familiar with the paper system can orient themselves, and so developers understand what each app input represents in Creighton terms.
+The app now maps 1:1 to the Creighton recording system. Sensation maps to the numeric code, and Appearances (multi-select) map to the letter codes.
 
-| Official Code | Example Full Notation | App: Sensation | App: Appearance | Mucus Rank |
-|---|---|---|---|---|
-| `0` | 0 | dry | none | 0 |
-| `2` | 2 | damp | none | 1 |
-| `2W` | 2W | wet | none | 2 |
-| `4` | 4 | damp | none | 1 |
-| `6` + C/P/G | 6C, 6P, 6G | damp | cloudy | 1 |
-| `8` + C/P/G | 8C, 8P | damp | cloudy | 1 |
-| `10` + K/L | 10K, 10L | slippery | stretchy | 3 |
-| `10DL` | 10DL | wet | none | 2 |
-| `10SL` | 10SL K | wet | clear | 3 |
-| `10WL` | 10WL K | wet | clear | 3 |
-| `+C/K suffix` | 8C/K | damp | cloudy | 1 |
-| `+K/L suffix` | 10K, 10L | slippery | clear | 3 |
+| Official Code | App: Sensation | App: Appearances | Mucus Rank |
+|---|---|---|---|
+| `0` | dry | (none) | 0 |
+| `2` | damp | (any) | 1 |
+| `2W` | wet | (any) | 2 |
+| `4` | shiny | (any) | 1 |
+| `6` | sticky | C, P, G, etc. | 1 |
+| `8` | tacky | C, P, G, etc. | 2 |
+| `10` | stretchy | K, L, etc. | 3 |
+| `10DL` | damp + lubricative | (auto-promoted) | 3 |
+| `10SL` | shiny + lubricative | (auto-promoted) | 3 |
+| `10WL` | wet + lubricative | (auto-promoted) | 3 |
 
-### Simplification notes
+### Appearance letter codes (multi-select)
 
-- Our app collapses codes 6 and 8 (sticky/tacky) into `damp + cloudy`. Both map to rank 1.
-- Code `4` (shiny without lubrication) is treated as `damp` in our system, also rank 1 if appearance is present, rank 0 if none.
-- Lubricative (`L`) is mapped to `clear` appearance at rank 3, consistent with peak-type classification.
-- The app does not expose the frequency codes (X1, X2, X3, AD) in MVP. This is a potential future enhancement for advanced users.
+| App Value | Creighton Code |
+|---|---|
+| brown | B |
+| cloudy | C |
+| cloudy_clear | C/K |
+| gummy | G |
+| clear | K |
+| lubricative | L |
+| pasty | P |
+| red | R |
+| yellow | Y |
+
+### Lubricative promotion rule
+
+When `lubricative` is selected as an appearance AND sensation is `damp`, `shiny`, or `wet`, the base code is promoted to 10DL / 10SL / 10WL respectively (rank 3, peak-type). The `L` is absorbed into the base code and excluded from the appearance suffix.
 
 ---
 

@@ -6,12 +6,10 @@ export const BG_BLEEDING = '#fca5a5';    // calendar -- do not change
 export const BG_POST_PEAK = '#fef08a';   // calendar -- do not change
 export const BG_NO_ENTRY = '#ffffff';    // calendar -- do not change
 export const BG_MISSING = '#F5F3F1';
-export const BG_PEAK_TYPE = '#ffffff';   // calendar -- do not change
+export const BG_PEAK_TYPE = '#D6D3CF';   // light warm grey for peak-type mucus
 export const BG_CARD_GRADIENT_START = '#F1EFEA';
-export const BG_CARD_GRADIENT_END = '#EAE7E3';
 
 // Indicator dots / accents (calendar -- do not change)
-export const PEAK_ACCENT = '#0369a1';
 export const FERTILE_ACCENT = '#16a34a';
 
 // Text
@@ -23,13 +21,13 @@ export const TEXT_SUBTLE = '#6F6A65';
 // Borders
 export const BORDER_TODAY = '#000000';   // calendar -- do not change
 export const BORDER_CARD = '#E7E2DE';
+export const PEAK_BORDER = '#4A4541';    // dark charcoal for confirmed peak border
 
 // Accents
 export const ACCENT_WARM = '#B89A8B';
 export const ACCENT_WARM_TINT = '#F5F3F1';
 export const BRAND_NAME = '#3F3A36';
 export const ACCENT_RED = '#f43f5e';
-export const ACCENT_RED_DARK = '#be123c';
 
 // Intercourse marker
 export const INTERCOURSE_ICON = '\u{1F339}';

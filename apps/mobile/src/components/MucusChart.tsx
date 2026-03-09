@@ -2,8 +2,8 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PhaseLabel } from '../../../../core/rulesEngine/src/types';
 import {
-  BG_CARD, BG_DRY, BG_POST_PEAK,
-  PEAK_ACCENT, FERTILE_ACCENT,
+  BG_CARD, BG_DRY, BG_POST_PEAK, BG_PEAK_TYPE,
+  FERTILE_ACCENT, PEAK_BORDER,
   TEXT_PRIMARY, TEXT_MUTED, TEXT_SUBTLE,
   BORDER_CARD, INTERCOURSE_ICON,
 } from '../theme/colors';
@@ -19,7 +19,7 @@ interface Props {
 function getBarColor(rank: number | null, phase: PhaseLabel): string {
   if (rank === null) return BG_DRY;
   if (phase === 'p_plus_1' || phase === 'p_plus_2' || phase === 'p_plus_3') return BG_POST_PEAK;
-  if (rank >= 3) return PEAK_ACCENT;
+  if (rank >= 3) return BG_PEAK_TYPE;
   if (rank >= 1) return FERTILE_ACCENT;
   return BG_DRY;
 }
@@ -76,7 +76,7 @@ export function MucusChart({ mucusRanks, phaseLabels, peakIndex, intercourseFlag
       <View style={styles.legend}>
         <LegendDot color={BG_DRY} label="Dry" />
         <LegendDot color={FERTILE_ACCENT} label="Mucus" />
-        <LegendDot color={PEAK_ACCENT} label="Peak" />
+        <LegendDot color={BG_PEAK_TYPE} label="Peak" />
         <LegendDot color={BG_POST_PEAK} label="Post-peak" />
       </View>
     </View>
@@ -108,10 +108,10 @@ const styles = StyleSheet.create({
   barCol: { alignItems: 'center', marginHorizontal: 2, width: 24 },
   barArea: { height: BAR_HEIGHT, justifyContent: 'flex-end' },
   bar: { width: 16, borderRadius: 4 },
-  peakBar: { borderWidth: 2, borderColor: PEAK_ACCENT },
+  peakBar: { borderWidth: 2, borderColor: PEAK_BORDER },
   roseAboveBar: { fontSize: 10, marginBottom: 2 },
   dayLabel: { fontSize: 10, color: TEXT_MUTED, marginTop: 4 },
-  peakDayLabel: { color: PEAK_ACCENT, fontWeight: '600' },
+  peakDayLabel: { color: PEAK_BORDER, fontWeight: '600' },
   legend: { flexDirection: 'row', justifyContent: 'center', marginTop: 12, gap: 12 },
   legendItem: { flexDirection: 'row', alignItems: 'center' },
   legendDot: { width: 10, height: 10, borderRadius: 5, marginRight: 4, borderWidth: 1, borderColor: BORDER_CARD },

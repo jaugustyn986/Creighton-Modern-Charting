@@ -3,15 +3,86 @@
 > This module must be deterministic, pure, and non-predictive. AI, forecasting, or probabilistic scoring are explicitly forbidden.
 
 ## Mucus Rank Mapping
-Given a daily entry or observation:
-1. If `sensation == dry` and `appearance == none` => rank `0`.
-2. If `sensation == slippery` OR `appearance == clear` OR `appearance == stretchy` => rank `3`.
-3. If `sensation == wet` => rank `2`.
-4. If `sensation == damp` => rank `1`.
-5. If `appearance` is not `none` (any visible mucus) => rank `1`.
-6. Else => rank `0`.
+Given a daily entry or observation with `sensation` and `appearances` (array):
+
+The rank is the **maximum** across all applicable signals:
+
+**Sensation rank:**
+
+| Sensation | Rank |
+|-----------|------|
+| `stretchy` | 3 |
+| `tacky` | 2 |
+| `wet` | 2 |
+| `sticky` | 1 |
+| `shiny` | 1 |
+| `damp` | 1 |
+| `dry` | 0 |
+
+**Lubricative promotion:** If `lubricative` is in the appearances array AND sensation is `damp`, `shiny`, or `wet`, effective rank becomes 3 (corresponding to base codes 10DL, 10SL, 10WL).
+
+**Appearance rank boost** (max across all selected):
+
+| Appearance | Boost |
+|------------|-------|
+| `clear` (K) | 3 |
+| `cloudy_clear` (C/K) | 3 |
+| `lubricative` (L) | 3 |
+| `cloudy` (C) | 1 |
+| `gummy` (G) | 1 |
+| `pasty` (P) | 1 |
+| `yellow` (Y) | 1 |
+| `brown` (B) | 0 |
+| `red` (R) | 0 |
+| `none` | 0 |
+
+**Final rank = max(sensationRank, lubricativePromotionRank, appearanceBoostRank)**
 
 If multiple observations exist in one day, daily rank is the `max(observationRanks)`.
+
+## Observation Fields
+
+The system captures three observation dimensions per day:
+
+- **Sensation** (single-select): `dry`, `damp`, `wet`, `shiny`, `sticky`, `tacky`, `stretchy`
+- **Appearances** (multi-select array): `none`, `brown`, `cloudy`, `cloudy_clear`, `gummy`, `clear`, `lubricative`, `pasty`, `red`, `yellow`
+- **Frequency**: `1`, `2`, `3`, `all_day`
+
+## Creighton Code Generation
+
+Each daily observation produces a deterministic Creighton-compatible code:
+
+**Base code** (sensation + Lubricative interaction):
+
+| Condition | Base Code |
+|-----------|-----------|
+| Lubricative + damp | 10DL |
+| Lubricative + shiny | 10SL |
+| Lubricative + wet | 10WL |
+| stretchy sensation | 10 |
+| tacky sensation | 8 |
+| sticky sensation | 6 |
+| wet sensation | 2W |
+| shiny sensation | 4 |
+| damp sensation | 2 |
+| dry (default) | 0 |
+
+**Appearance suffix:** Concatenated in Creighton order (B, C, C/K, G, K, L, P, R, Y). When Lubricative promoted the base code (damp/shiny/wet + L), L is excluded from the suffix (it is embedded in the base code).
+
+**Frequency suffix**: X1 (once), X2 (twice), X3 (three times), AD (all day), or empty.
+
+**Full code** = `baseCode` + `appearanceSuffix` + `frequencySuffix`. Example: `10WLKAD`.
+
+## Fertility Classification
+
+Derived from the base code:
+
+| Base Code | Classification |
+|-----------|---------------|
+| 0 | dry |
+| 2, 2W, 4 | early_fertile |
+| 6, 8 | fertile |
+| 10, 10DL, 10SL, 10WL | peak_type |
 
 ## Fertile Start
 - Fertile start is the first day after cycle start where `mucus_rank >= 1`.
@@ -306,7 +377,12 @@ These examples serve as canonical test cases. The engineering implementation mus
 
 ## Notes
 
-- `mucusRankOverride` on `DailyEntry` is a test/fixture-only field that bypasses the sensation/appearance rank calculation. It must not be exposed in any user-facing interface.
+- `mucusRankOverride` on `DailyEntry` is a test/fixture-only field that bypasses the sensation/appearances rank calculation. It must not be exposed in any user-facing interface.
+- The `Stretch` type and `stretch` field have been removed. Sticky, tacky, and stretchy are now sensation values.
+- `Appearance` is now a multi-select array (`appearances: Appearance[]`) with 10 options aligned to the Creighton letter codes.
+- `Lubricative` appearance promotes damp/shiny/wet sensations to code 10DL/10SL/10WL (rank 3).
+- Legacy data migration (v3): `slippery` → `wet` + `lubricative`; `stretch` values merged into `sensation`; `appearance` (single) → `appearances` (array).
+- Legacy `timesObserved` values are migrated to the `frequency` field on load.
 
 ## Multi-Cycle Layer
 

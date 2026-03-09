@@ -11,11 +11,12 @@ import {
   View,
 } from 'react-native';
 import { computeMucusRank } from '../../../../core/rulesEngine/src/rank';
+import { classifyFertility } from '../../../../core/rulesEngine/src/creightonCode';
 import {
   Appearance,
   BleedingType,
   DailyEntry,
-  Quantity,
+  Frequency,
   Sensation,
 } from '../../../../core/rulesEngine/src/types';
 import {
@@ -41,62 +42,101 @@ const BLEEDING_OPTIONS: { value: BleedingType; label: string }[] = [
   { value: 'brown', label: 'Brown' },
 ];
 
-const SENSATION_OPTIONS: { value: Sensation; label: string; desc: string; rankHint: string }[] = [
-  { value: 'dry', label: 'Dry', desc: 'No sensation at vulva', rankHint: 'Rank 0 - Non-fertile' },
-  { value: 'damp', label: 'Damp', desc: 'Slightly moist feeling', rankHint: 'Rank 1 - Early fertile' },
-  { value: 'wet', label: 'Wet', desc: 'Wet feeling without slipperiness', rankHint: 'Rank 2 - Fertile' },
-  { value: 'slippery', label: 'Slippery', desc: 'Lubricative, slippery sensation', rankHint: 'Rank 3 - Peak fertility!' },
+const SENSATION_OPTIONS: { value: Sensation; label: string; desc: string }[] = [
+  { value: 'dry', label: 'Dry', desc: 'No sensation' },
+  { value: 'damp', label: 'Damp', desc: 'Slightly moist without lubrication' },
+  { value: 'wet', label: 'Wet', desc: 'Wet without lubrication' },
+  { value: 'shiny', label: 'Shiny', desc: 'Shiny without lubrication' },
+  { value: 'sticky', label: 'Sticky', desc: 'Holds together, does not stretch' },
+  { value: 'tacky', label: 'Tacky', desc: 'Stretches slightly then breaks' },
+  { value: 'stretchy', label: 'Stretchy', desc: 'Stretches 1 inch or more' },
 ];
 
-const APPEARANCE_OPTIONS: { value: Appearance; label: string; desc: string; rankHint?: string }[] = [
-  { value: 'none', label: 'None', desc: 'No visible mucus' },
-  { value: 'cloudy', label: 'Cloudy', desc: 'Cloudy, sticky, or pasty' },
-  { value: 'clear', label: 'Clear', desc: 'Clear or transparent', rankHint: 'Rank 3 - Peak!' },
-  { value: 'stretchy', label: 'Stretchy', desc: 'Stretches between fingers (egg white), or lubricative/slippery on tissue', rankHint: 'Rank 3 - Peak!' },
-];
-
-const QUANTITY_OPTIONS: { value: Quantity; label: string }[] = [
+const APPEARANCE_OPTIONS: { value: Appearance; label: string }[] = [
   { value: 'none', label: 'None' },
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
+  { value: 'brown', label: 'Brown' },
+  { value: 'cloudy', label: 'Cloudy (white)' },
+  { value: 'cloudy_clear', label: 'Cloudy/Clear' },
+  { value: 'gummy', label: 'Gummy' },
+  { value: 'clear', label: 'Clear' },
+  { value: 'lubricative', label: 'Lubricative' },
+  { value: 'pasty', label: 'Pasty' },
+  { value: 'red', label: 'Red' },
+  { value: 'yellow', label: 'Yellow' },
 ];
 
-const RANK_LABELS: Record<number, { type: string; desc: string; hint: string }> = {
-  0: { type: 'Type 0 - Dry', desc: 'No mucus present. No discharge observed.', hint: 'Dry day. Record as no mucus.' },
-  1: { type: 'Type 1 - Damp', desc: 'Sticky, pasty, or cloudy mucus. Non-peak type.', hint: 'Early fertility signs. Non-peak mucus detected.' },
-  2: { type: 'Type 2 - Wet', desc: 'Wet, cloudy mucus. Fertile but not peak-type.', hint: 'Fertile day. Cervical mucus is present and wet.' },
-  3: { type: 'Type 3 - Peak', desc: 'Clear, stretchy, lubricative, or slippery mucus. Peak-type.', hint: 'Peak fertility! This is your most fertile mucus sign.' },
-};
+const FREQUENCY_OPTIONS: { value: Frequency; label: string }[] = [
+  { value: 1, label: 'Once' },
+  { value: 2, label: 'Twice' },
+  { value: 3, label: 'Three times' },
+  { value: 'all_day', label: 'All day' },
+];
 
-function isContradictory(sensation: Sensation, appearance: Appearance): boolean {
-  return sensation === 'dry' && (appearance === 'clear' || appearance === 'stretchy');
-}
+const CLASSIFICATION_LABELS: Record<string, { title: string; desc: string; hint: string }> = {
+  dry: {
+    title: 'Dry Observation',
+    desc: 'No mucus observed today.',
+    hint: 'Dry day. Record as no mucus.',
+  },
+  early_fertile: {
+    title: 'Early Fertile Observation',
+    desc: 'Early mucus signs are present.',
+    hint: 'Early fertility signs detected. Continue daily observations.',
+  },
+  fertile: {
+    title: 'Fertile Observation',
+    desc: 'Fertile-type mucus is present.',
+    hint: 'Fertile day. Cervical mucus indicates fertility.',
+  },
+  peak_type: {
+    title: 'Peak-Type Observation',
+    desc: 'Stretchy or lubricative mucus is present.',
+    hint: 'Peak fertility! This is your most fertile mucus sign.',
+  },
+};
 
 export function EntryForm({ initialEntry, date, onSave, onCancel, onDelete }: Props): JSX.Element {
   const [missing, setMissing] = useState(initialEntry?.missing ?? false);
   const [bleeding, setBleeding] = useState<BleedingType>(initialEntry?.bleeding ?? 'none');
   const [sensation, setSensation] = useState<Sensation>(initialEntry?.sensation ?? 'dry');
-  const [appearance, setAppearance] = useState<Appearance>(initialEntry?.appearance ?? 'none');
-  const [quantity, setQuantity] = useState<Quantity>(initialEntry?.quantity ?? 'none');
-  const [timesObserved, setTimesObserved] = useState<1 | 2 | 3 | undefined>(initialEntry?.timesObserved);
-  const [showTimesInfo, setShowTimesInfo] = useState(false);
+  const [appearances, setAppearances] = useState<Appearance[]>(initialEntry?.appearances ?? []);
+  const [frequency, setFrequency] = useState<Frequency | undefined>(initialEntry?.frequency);
+  const [showFreqInfo, setShowFreqInfo] = useState(false);
+  const [showNotesInfo, setShowNotesInfo] = useState(false);
   const [intercourse, setIntercourse] = useState(initialEntry?.intercourse ?? false);
   const [notes, setNotes] = useState(initialEntry?.notes ?? '');
 
   const rank = useMemo(
-    () => missing ? null : computeMucusRank({ sensation, appearance }),
-    [sensation, appearance, missing],
+    () => missing ? null : computeMucusRank({ sensation, appearances }),
+    [sensation, appearances, missing],
   );
 
-  const contradictory = !missing && isContradictory(sensation, appearance);
-  const rankInfo = rank !== null ? RANK_LABELS[rank] : null;
+  const classification = useMemo(
+    () => missing ? null : classifyFertility({ sensation, appearances }),
+    [sensation, appearances, missing],
+  );
+
+  const classInfo = classification ? CLASSIFICATION_LABELS[classification] : null;
 
   const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
   });
+
+  const toggleAppearance = (value: Appearance) => {
+    if (value === 'none') {
+      setAppearances([]);
+      return;
+    }
+    setAppearances((prev) => {
+      const filtered = prev.filter((a) => a !== 'none');
+      if (filtered.includes(value)) {
+        return filtered.filter((a) => a !== value);
+      }
+      return [...filtered, value];
+    });
+  };
 
   const handleSave = () => {
     if (missing) {
@@ -107,9 +147,8 @@ export function EntryForm({ initialEntry, date, onSave, onCancel, onDelete }: Pr
       date,
       bleeding,
       sensation,
-      appearance,
-      quantity,
-      timesObserved,
+      appearances: appearances.length > 0 ? appearances : undefined,
+      frequency,
       intercourse,
       notes: notes.trim() || undefined,
     });
@@ -162,7 +201,7 @@ export function EntryForm({ initialEntry, date, onSave, onCancel, onDelete }: Pr
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Sensation at Vulva</Text>
+            <Text style={styles.fieldLabel}>Sensation</Text>
             <View style={styles.cardGrid}>
               {SENSATION_OPTIONS.map((opt) => (
                 <Pressable
@@ -174,75 +213,57 @@ export function EntryForm({ initialEntry, date, onSave, onCancel, onDelete }: Pr
                     {opt.label}
                   </Text>
                   <Text style={styles.cardDesc}>{opt.desc}</Text>
-                  <Text style={[styles.cardHint, opt.rankHint.includes('Peak') && styles.cardHintPeak]}>
-                    {opt.rankHint}
-                  </Text>
                 </Pressable>
               ))}
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Mucus Appearance</Text>
-            <View style={styles.cardGrid}>
-              {APPEARANCE_OPTIONS.map((opt) => (
-                <Pressable
-                  key={opt.value}
-                  style={[styles.card, appearance === opt.value && styles.cardSelected]}
-                  onPress={() => setAppearance(opt.value)}
-                >
-                  <Text style={[styles.cardTitle, appearance === opt.value && styles.cardTitleSelected]}>
-                    {opt.label}
-                  </Text>
-                  <Text style={styles.cardDesc}>{opt.desc}</Text>
-                  {opt.rankHint && (
-                    <Text style={[styles.cardHint, styles.cardHintPeak]}>{opt.rankHint}</Text>
-                  )}
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Mucus Quantity</Text>
+            <Text style={styles.fieldLabel}>Appearance</Text>
             <View style={styles.pillRow}>
-              {QUANTITY_OPTIONS.map((opt) => (
-                <Pressable
-                  key={opt.value}
-                  style={[styles.pill, quantity === opt.value && styles.pillSelected]}
-                  onPress={() => setQuantity(opt.value)}
-                >
-                  <Text style={[styles.pillText, quantity === opt.value && styles.pillTextSelected]}>
-                    {opt.label}
-                  </Text>
-                </Pressable>
-              ))}
+              {APPEARANCE_OPTIONS.map((opt) => {
+                const isNone = opt.value === 'none';
+                const selected = isNone
+                  ? appearances.length === 0
+                  : appearances.includes(opt.value);
+                return (
+                  <Pressable
+                    key={opt.value}
+                    style={[styles.pill, selected && styles.pillSelected]}
+                    onPress={() => toggleAppearance(opt.value)}
+                  >
+                    <Text style={[styles.pillText, selected && styles.pillTextSelected]}>
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
           <View style={styles.section}>
             <View style={styles.labelRow}>
-              <Text style={styles.fieldLabel}># of Times</Text>
-              <Pressable onPress={() => setShowTimesInfo(!showTimesInfo)} hitSlop={8}>
+              <Text style={styles.fieldLabel}>Observed During the Day</Text>
+              <Pressable onPress={() => setShowFreqInfo(!showFreqInfo)} hitSlop={8}>
                 <View style={styles.infoBubble}>
                   <Text style={styles.infoBubbleText}>i</Text>
                 </View>
               </Pressable>
             </View>
-            {showTimesInfo && (
+            {showFreqInfo && (
               <Text style={styles.infoTooltip}>
                 How many times you noticed this observation during the day.
               </Text>
             )}
             <View style={styles.pillRow}>
-              {([1, 2, 3] as const).map((v) => (
+              {FREQUENCY_OPTIONS.map((opt) => (
                 <Pressable
-                  key={v}
-                  style={[styles.pill, timesObserved === v && styles.pillSelected]}
-                  onPress={() => setTimesObserved(timesObserved === v ? undefined : v)}
+                  key={String(opt.value)}
+                  style={[styles.pill, frequency === opt.value && styles.pillSelected]}
+                  onPress={() => setFrequency(frequency === opt.value ? undefined : opt.value)}
                 >
-                  <Text style={[styles.pillText, timesObserved === v && styles.pillTextSelected]}>
-                    {v}
+                  <Text style={[styles.pillText, frequency === opt.value && styles.pillTextSelected]}>
+                    {opt.label}
                   </Text>
                 </Pressable>
               ))}
@@ -261,7 +282,19 @@ export function EntryForm({ initialEntry, date, onSave, onCancel, onDelete }: Pr
           )}
 
           <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Notes (Optional)</Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.fieldLabel}>Notes (Optional)</Text>
+              <Pressable onPress={() => setShowNotesInfo(!showNotesInfo)} hitSlop={8}>
+                <View style={styles.infoBubble}>
+                  <Text style={styles.infoBubbleText}>i</Text>
+                </View>
+              </Pressable>
+            </View>
+            {showNotesInfo && (
+              <Text style={styles.infoTooltip}>
+                Use notes to record PMS symptoms, mood, energy levels, or anything else you want to remember about this day.
+              </Text>
+            )}
             <TextInput
               style={styles.notesInput}
               placeholder="Any additional observations, symptoms, or notes..."
@@ -271,20 +304,11 @@ export function EntryForm({ initialEntry, date, onSave, onCancel, onDelete }: Pr
             />
           </View>
 
-          {contradictory && (
-            <View style={styles.warningBox}>
-              <Text style={styles.warningText}>
-                You selected Dry sensation with {appearance} appearance. This is unusual —
-                please double-check your observation. If accurate, this will be recorded as peak-type mucus.
-              </Text>
-            </View>
-          )}
-
-          {rankInfo && (
+          {classInfo && (
             <View style={styles.summaryBox}>
-              <Text style={styles.summaryType}>{rankInfo.type}</Text>
-              <Text style={styles.summaryDesc}>{rankInfo.desc}</Text>
-              <Text style={styles.summaryHint}>{rankInfo.hint}</Text>
+              <Text style={styles.summaryType}>{classInfo.title}</Text>
+              <Text style={styles.summaryDesc}>{classInfo.desc}</Text>
+              <Text style={styles.summaryHint}>{classInfo.hint}</Text>
             </View>
           )}
         </>
@@ -342,8 +366,6 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, fontWeight: '600', color: TEXT_PRIMARY },
   cardTitleSelected: { color: BRAND_NAME },
   cardDesc: { fontSize: 11, color: TEXT_SUBTLE, marginTop: 2 },
-  cardHint: { fontSize: 11, color: TEXT_MUTED, marginTop: 4 },
-  cardHintPeak: { color: ACCENT_WARM, fontWeight: '600' },
   intercourseRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: ACCENT_WARM_TINT, padding: 16, borderRadius: 10, marginTop: 16,
@@ -356,10 +378,6 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: BORDER_CARD, borderRadius: 8,
     padding: 12, minHeight: 80, textAlignVertical: 'top', fontSize: 14, color: TEXT_PRIMARY,
   },
-  warningBox: {
-    backgroundColor: '#fef3c7', padding: 12, borderRadius: 8, marginTop: 16,
-  },
-  warningText: { fontSize: 12, color: '#92400e' },
   summaryBox: {
     backgroundColor: BG_PAGE, padding: 16, borderRadius: 10,
     marginTop: 16, borderWidth: 1, borderColor: BORDER_CARD,

@@ -1,7 +1,8 @@
 export type BleedingType = 'heavy' | 'moderate' | 'light' | 'spotting' | 'none' | 'brown';
-export type Sensation = 'dry' | 'damp' | 'wet' | 'slippery';
-export type Appearance = 'none' | 'cloudy' | 'clear' | 'stretchy';
-export type Quantity = 'none' | 'low' | 'medium' | 'high';
+export type Sensation = 'dry' | 'damp' | 'wet' | 'shiny' | 'sticky' | 'tacky' | 'stretchy';
+export type Appearance = 'none' | 'brown' | 'cloudy' | 'cloudy_clear' | 'gummy' | 'clear' | 'lubricative' | 'pasty' | 'red' | 'yellow';
+export type Frequency = 1 | 2 | 3 | 'all_day';
+export type FertilityClassification = 'dry' | 'early_fertile' | 'fertile' | 'peak_type';
 
 export type PhaseLabel =
   | 'dry'
@@ -17,23 +18,29 @@ export type PhaseLabel =
 
 export interface Observation {
   sensation: Sensation;
-  appearance: Appearance;
-  quantity?: Quantity;
+  appearances: Appearance[];
 }
 
 export interface DailyEntry {
   date?: string;
   bleeding?: BleedingType;
   sensation?: Sensation;
-  appearance?: Appearance;
-  quantity?: Quantity;
+  appearances?: Appearance[];
   intercourse?: boolean;
   notes?: string;
-  timesObserved?: 1 | 2 | 3;
+  frequency?: Frequency;
   missing?: boolean;
   observations?: Observation[];
   /** Test/fixture only -- bypasses sensation/appearance rank calculation. */
   mucusRankOverride?: number;
+}
+
+export interface CreightonCode {
+  baseCode: string;
+  appearanceSuffix: string;
+  frequencySuffix: string;
+  fullCode: string;
+  fertilityClassification: FertilityClassification;
 }
 
 export interface CycleResult {

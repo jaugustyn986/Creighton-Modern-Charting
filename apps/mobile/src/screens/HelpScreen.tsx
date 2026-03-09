@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useResetOnboarding } from '../navigation/AppNavigator';
 import {
   BG_BLEEDING, BG_DRY, BG_NO_ENTRY, BG_PEAK_TYPE, BG_POST_PEAK, BG_PAGE, BG_CARD,
-  PEAK_ACCENT, FERTILE_ACCENT, BORDER_CARD, BORDER_TODAY, INTERCOURSE_ICON,
+  FERTILE_ACCENT, PEAK_BORDER, BORDER_CARD, BORDER_TODAY, INTERCOURSE_ICON,
   TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_SUBTLE,
 } from '../theme/colors';
 
@@ -34,13 +34,13 @@ const SECTIONS: AccordionItemData[] = [
       'Type 0 - Dry\nNo mucus present. No discharge observed at the vulva. Dry day — record as no mucus.\n\n' +
       'Type 1 - Damp\nSticky, pasty, or cloudy mucus. Slightly moist feeling. Non-peak type — early fertility sign.\n\n' +
       'Type 2 - Wet\nWet, cloudy mucus. Fertile but not peak-type. Indicates rising fertility.\n\n' +
-      'Type 3 - Peak\nClear, stretchy, lubricative, or slippery mucus (like raw egg white). Peak-type mucus — this signals ovulation is near.',
+      'Type 3 - Peak\nClear, stretchy, or lubricative mucus (like raw egg white). Peak-type mucus — this signals ovulation is near.',
   },
   {
     title: 'What is the Peak Day?',
     icon: '✨',
     content:
-      'The Peak Day is the last day you observe peak-type mucus (clear, stretchy, or slippery/lubricative).\n\n' +
+      'The Peak Day is the last day you observe peak-type mucus (clear, stretchy, or lubricative).\n\n' +
       'Why it matters: Ovulation typically occurs within 1–2 days after the Peak Day. This is your body\'s signal that the egg has been released.\n\n' +
       'The app uses the P+3 Rule: After Peak Day, you need 3 days of lower-quality mucus to confirm ovulation. Your fertile window ends at P+3.',
   },
@@ -91,8 +91,8 @@ function ColorGuideSwatches(): JSX.Element {
       <SwatchRow bg={BG_BLEEDING} label="Bleeding day" />
       <SwatchRow bg={BG_DRY} label="Dry day (no mucus)" />
       <SwatchRow bg={BG_DRY} dotColor={FERTILE_ACCENT} label="Non-peak mucus (Type 1–2)" />
-      <SwatchRow bg={BG_PEAK_TYPE} dotColor={PEAK_ACCENT} label="Peak-type mucus (Type 3)" />
-      <SwatchRow bg={BG_PEAK_TYPE} dotColor={PEAK_ACCENT} borderColor={PEAK_ACCENT} label="Confirmed Peak Day" />
+      <SwatchRow bg={BG_PEAK_TYPE} label="Peak-type mucus (Type 3)" />
+      <SwatchRow bg={BG_PEAK_TYPE} borderColor={PEAK_BORDER} label="Confirmed Peak Day" />
       <SwatchRow bg={BG_POST_PEAK} label="Post-peak (P+1, P+2, P+3)" />
       <SwatchRow bg={BG_DRY} borderColor={BORDER_TODAY} label="Today" />
       <View style={swatchStyles.row}>

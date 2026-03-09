@@ -1,10 +1,10 @@
 {
   "entries": [
-    { "sensation": "dry", "appearance": "none" },
-    { "sensation": "dry", "appearance": "none" },
-    { "sensation": "dry", "appearance": "none" },
-    { "sensation": "dry", "appearance": "none" },
-    { "sensation": "dry", "appearance": "none" }
+    { "sensation": "dry", "appearances": [] },
+    { "sensation": "dry", "appearances": [] },
+    { "sensation": "dry", "appearances": [] },
+    { "sensation": "dry", "appearances": [] },
+    { "sensation": "dry", "appearances": [] }
   ],
   "expected": {
     "fertileStartIndex": null,

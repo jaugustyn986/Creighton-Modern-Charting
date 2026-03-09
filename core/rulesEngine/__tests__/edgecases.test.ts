@@ -58,8 +58,8 @@ describe('rules engine edge cases', () => {
 
   it('Multiple entries per day uses max rank', () => {
     const entries: DailyEntry[] = [
-      { bleeding: 'none', observations: [{ sensation: 'damp', appearance: 'cloudy' }, { sensation: 'wet', appearance: 'cloudy' }] },
-      { bleeding: 'none', observations: [{ sensation: 'dry', appearance: 'none' }, { sensation: 'slippery', appearance: 'cloudy' }] }
+      { bleeding: 'none', observations: [{ sensation: 'damp', appearances: ['cloudy'] }, { sensation: 'wet', appearances: ['cloudy'] }] },
+      { bleeding: 'none', observations: [{ sensation: 'dry', appearances: [] }, { sensation: 'wet', appearances: ['lubricative'] }] }
     ];
     const result = recalculateCycle(entries);
     expect(result.mucusRanks).toEqual([2, 3]);
@@ -92,16 +92,16 @@ describe('rules engine edge cases', () => {
 
   it('dry + cloudy yields rank 1 (visible mucus = fertility sign)', () => {
     const entries: DailyEntry[] = [
-      { sensation: 'dry', appearance: 'cloudy' },
+      { sensation: 'dry', appearances: ['cloudy'] },
     ];
     const result = recalculateCycle(entries);
     expect(result.mucusRanks).toEqual([1]);
     expect(result.fertileStartIndex).toBe(0);
   });
 
-  it('dry + stretchy yields rank 3 (stretchy triggers peak)', () => {
+  it('stretchy sensation yields rank 3 (stretchy triggers peak)', () => {
     const entries: DailyEntry[] = [
-      { sensation: 'dry', appearance: 'stretchy' },
+      { sensation: 'stretchy', appearances: [] },
     ];
     const result = recalculateCycle(entries);
     expect(result.mucusRanks).toEqual([3]);
@@ -142,7 +142,7 @@ describe('rules engine edge cases', () => {
 
   it('single-day cycle', () => {
     const entries: DailyEntry[] = [
-      { sensation: 'dry', appearance: 'none' },
+      { sensation: 'dry', appearances: [] },
     ];
     const result = recalculateCycle(entries);
     expect(result.fertileStartIndex).toBeNull();

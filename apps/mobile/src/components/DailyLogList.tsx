@@ -4,7 +4,7 @@ import { CycleSlice } from '../../../../core/rulesEngine/src/multiCycle';
 import { PhaseLabel } from '../../../../core/rulesEngine/src/types';
 import {
   BG_BLEEDING, BG_CARD, BG_DRY, BG_MISSING, BG_PEAK_TYPE, BG_POST_PEAK,
-  PEAK_ACCENT, FERTILE_ACCENT,
+  FERTILE_ACCENT, PEAK_BORDER,
   TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
   BORDER_CARD, INTERCOURSE_ICON,
 } from '../theme/colors';
@@ -64,8 +64,8 @@ export function DailyLogList({ cycle }: Props): JSX.Element {
           const isPeak = phase === 'peak_confirmed';
           const circleColor = getDayCircleColor(phase, rank, bleeding);
           const dotColor =
-            phase === 'peak_confirmed' ? PEAK_ACCENT
-            : (phase === 'fertile_open' || phase === 'fertile_unconfirmed_peak') && rank !== null && rank >= 3 ? PEAK_ACCENT
+            phase === 'peak_confirmed' ? null
+            : (phase === 'fertile_open' || phase === 'fertile_unconfirmed_peak') && rank !== null && rank >= 3 ? null
             : (phase === 'fertile_open' || phase === 'fertile_unconfirmed_peak') && rank !== null && rank >= 1 ? FERTILE_ACCENT
             : null;
 
@@ -79,8 +79,8 @@ export function DailyLogList({ cycle }: Props): JSX.Element {
                 <Text style={styles.dateText}>{entry.date ? formatDate(entry.date) : '--'}</Text>
                 <Text style={styles.rankText}>
                   {bleeding ? `Bleeding (${entry.bleeding})` : getRankLabel(rank)}
-                  {!bleeding && entry.timesObserved && entry.timesObserved > 1
-                    ? ` x${entry.timesObserved}`
+                  {!bleeding && entry.frequency
+                    ? ` ${entry.frequency === 'all_day' ? 'AD' : `x${entry.frequency}`}`
                     : ''}
                 </Text>
               </View>
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   peakRow: {
     borderWidth: 1.5,
-    borderColor: PEAK_ACCENT,
+    borderColor: PEAK_BORDER,
     borderRadius: 8,
     marginHorizontal: -4,
     paddingHorizontal: 4,

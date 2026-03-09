@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { PhaseLabel } from '../../../../core/rulesEngine/src/types';
 import {
   BG_BLEEDING, BG_CARD, BG_DRY, BG_NO_ENTRY, BG_PEAK_TYPE, BG_POST_PEAK,
-  PEAK_ACCENT, FERTILE_ACCENT,
+  FERTILE_ACCENT, PEAK_BORDER,
   TEXT_PRIMARY, TEXT_MUTED, TEXT_SUBTLE,
   BORDER_TODAY, BORDER_CARD, INTERCOURSE_ICON,
 } from '../theme/colors';
@@ -65,11 +65,11 @@ function getDayBackground(day: DayInfo): string {
 
 function getIndicatorColor(day: DayInfo): string | null {
   if (!day.hasEntry || day.bleeding) return null;
-  if (day.phaseLabel === 'peak_confirmed') return PEAK_ACCENT;
+  if (day.phaseLabel === 'peak_confirmed') return null;
 
   const rank = day.mucusRank;
   if (rank === null || rank === undefined) return null;
-  if (rank >= 3) return PEAK_ACCENT;
+  if (rank >= 3) return null;
   if (rank >= 1) return FERTILE_ACCENT;
   return null;
 }
@@ -152,7 +152,7 @@ export function CalendarGrid({ year, month, days, onDayPress, onPrevMonth, onNex
         <LegendItem color={BG_BLEEDING} label="Bleeding" />
         <LegendItem color={BG_DRY} label="Dry" />
         <LegendItem color={BG_DRY} dotColor={FERTILE_ACCENT} label="Mucus" />
-        <LegendItem color={BG_PEAK_TYPE} dotColor={PEAK_ACCENT} label="Peak-type" />
+        <LegendItem color={BG_PEAK_TYPE} label="Peak-type" />
         <LegendItem color={BG_POST_PEAK} label="Post-peak" />
       </View>
     </View>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     margin: 1,
   },
   todayBorder: { borderWidth: 2, borderColor: BORDER_TODAY },
-  peakBorder: { borderWidth: 2, borderColor: PEAK_ACCENT },
+  peakBorder: { borderWidth: 2, borderColor: PEAK_BORDER },
   dayText: { fontSize: 14, fontWeight: '500' },
   babyDot: {
     width: 7, height: 7, borderRadius: 4,

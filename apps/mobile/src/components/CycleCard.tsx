@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CycleSlice } from '../../../../core/rulesEngine/src/multiCycle';
 import {
   BG_CARD, BG_DRY, BG_POST_PEAK, BG_MISSING,
-  PEAK_ACCENT, TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
+  TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
   BORDER_CARD,
 } from '../theme/colors';
 

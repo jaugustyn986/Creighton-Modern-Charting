@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { CycleSlice } from '../../../../core/rulesEngine/src/multiCycle';
 import {
   BG_CARD, BG_DRY, BG_POST_PEAK,
-  PEAK_ACCENT, FERTILE_ACCENT,
+  FERTILE_ACCENT, PEAK_BORDER,
   TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
   BORDER_CARD,
 } from '../theme/colors';
@@ -40,7 +40,7 @@ export function FertileTimeline({ cycle }: Props): JSX.Element {
     milestones.push({
       label: 'Peak Day',
       dayLabel: `Day ${peakDay}`,
-      color: PEAK_ACCENT,
+      color: PEAK_BORDER,
     });
   }
 

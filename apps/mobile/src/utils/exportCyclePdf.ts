@@ -1,4 +1,5 @@
 import { CycleSlice } from '../../../../core/rulesEngine/src/multiCycle';
+import { generateCreightonCode } from '../../../../core/rulesEngine/src/creightonCode';
 import { PhaseLabel } from '../../../../core/rulesEngine/src/types';
 
 const PHASE_DISPLAY: Record<PhaseLabel, string> = {
@@ -16,7 +17,7 @@ const PHASE_DISPLAY: Record<PhaseLabel, string> = {
 
 const C_DRY = '#dcfce7';
 const C_POST_PEAK = '#fef08a';
-const C_PEAK = '#0369a1';
+const C_PEAK = '#D6D3CF';
 const C_FERTILE = '#16a34a';
 
 function barColor(rank: number | null, phase: PhaseLabel): string {
@@ -29,7 +30,7 @@ function barColor(rank: number | null, phase: PhaseLabel): string {
 
 function phaseBg(phase: PhaseLabel): string {
   switch (phase) {
-    case 'peak_confirmed': return '#dbeafe';
+    case 'peak_confirmed': return '#E8E6E3';
     case 'p_plus_1': case 'p_plus_2': case 'p_plus_3': return '#fef9c3';
     case 'fertile_open': case 'fertile_unconfirmed_peak': return '#dcfce7';
     default: return '#ffffff';
@@ -54,7 +55,7 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
       const h = rank !== null ? Math.max((rank / MAX_RANK) * MAX_BAR_H, 4) : 0;
       const color = barColor(rank, cycle.result.phaseLabels[i]);
       const isPeak = cycle.result.peakIndex === i;
-      const border = isPeak ? 'border:2px solid #0369a1;' : '';
+      const border = isPeak ? 'border:2px solid #4A4541;' : '';
       const marker = includeIntercourse && cycle.entries[i]?.intercourse ? '🌹' : '';
       return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:12px;">
         <span style="font-size:8px;margin-bottom:2px;">${marker}</span>
@@ -71,7 +72,11 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
       const phase = cycle.result.phaseLabels[i];
       const bg = phaseBg(phase);
       const rank = cycle.result.mucusRanks[i];
-      const times = entry.timesObserved && entry.timesObserved > 1 ? `x${entry.timesObserved}` : '';
+      const freq = entry.frequency
+        ? (entry.frequency === 'all_day' ? 'AD' : `x${entry.frequency}`)
+        : '';
+      const appearanceList = entry.appearances?.filter((a) => a !== 'none').join(', ') ?? '';
+      const code = generateCreightonCode(entry).fullCode;
       const ic = includeIntercourse
         ? `<td style="padding:6px 8px;text-align:center;">${entry.intercourse ? '🌹' : ''}</td>`
         : '';
@@ -80,10 +85,10 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
         <td style="padding:6px 8px;">${entry.date ?? ''}</td>
         <td style="padding:6px 8px;">${entry.bleeding && entry.bleeding !== 'none' ? entry.bleeding : ''}</td>
         <td style="padding:6px 8px;">${entry.sensation ?? ''}</td>
-        <td style="padding:6px 8px;">${entry.appearance ?? ''}</td>
-        <td style="padding:6px 8px;">${entry.quantity ?? ''}</td>
-        <td style="padding:6px 8px;text-align:center;">${times}</td>
+        <td style="padding:6px 8px;">${appearanceList}</td>
+        <td style="padding:6px 8px;text-align:center;">${freq}</td>
         <td style="padding:6px 8px;text-align:center;">${rank ?? ''}</td>
+        <td style="padding:6px 8px;">${code}</td>
         <td style="padding:6px 8px;">${PHASE_DISPLAY[phase] ?? phase}</td>
         ${ic}
       </tr>`;
@@ -132,9 +137,9 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
         <th style="padding:6px 8px;">Bleeding</th>
         <th style="padding:6px 8px;">Sensation</th>
         <th style="padding:6px 8px;">Appearance</th>
-        <th style="padding:6px 8px;">Mucus Quantity</th>
-        <th style="padding:6px 8px;text-align:center;"># Times</th>
+        <th style="padding:6px 8px;text-align:center;">Freq</th>
         <th style="padding:6px 8px;text-align:center;">Rank</th>
+        <th style="padding:6px 8px;">Code</th>
         <th style="padding:6px 8px;">Phase</th>
         ${intercourseHeader}
       </tr>

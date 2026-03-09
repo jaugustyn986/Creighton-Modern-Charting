@@ -31,8 +31,9 @@ export function SettingsScreen(): JSX.Element {
       const fileUri = FileSystem.cacheDirectory + 'well-within-data.json';
       await FileSystem.writeAsStringAsync(fileUri, json);
       await shareAsync(fileUri, { mimeType: 'application/json' });
-    } catch (e: any) {
-      Alert.alert('Export Failed', e?.message ?? 'Could not export data.');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not export data.';
+      Alert.alert('Export Failed', msg);
     } finally {
       setExporting(false);
     }
@@ -43,8 +44,9 @@ export function SettingsScreen(): JSX.Element {
     try {
       await clearAllEntries();
       Alert.alert('Data Cleared', 'All observations and cycle history have been removed.');
-    } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'Could not clear data.');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not clear data.';
+      Alert.alert('Error', msg);
     }
   }, []);
 

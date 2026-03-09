@@ -509,6 +509,18 @@ Log of implemented features and doc updates for traceability.
 | 2025-03-05 | UI Polish Pass — 8pt spacing | Normalized margins and padding to 8/16/24/32 multiples across CalendarScreen, SegmentedToggle, TodayEntryCard, and section gaps for calmer vertical rhythm. |
 | 2025-03-05 | UI Polish Pass — component cleanup | Replaced 40+ hardcoded hex values with theme tokens in EntryForm, StatusBanner, OnboardingScreen, SettingsScreen, CycleDetailScreen, and SegmentedToggle. Softened toggle to muted clay (#B89A8B), warmed StatusBanner default/post-peak backgrounds, unified modal overlay opacity. |
 | 2025-03-05 | UI Polish Pass — PDF warm palette | Updated exportCyclePdf.ts non-chart colors (body text, borders, stat cards, footer) to match the warm app palette. |
+| 2025-03-05 | Observation model refactor | Replaced `Appearance: 'stretchy'` with separate `Stretch` type (none/sticky/tacky/stretchy). Removed `Quantity` field. Replaced `timesObserved` with `Frequency` (1/2/3/all_day). Updated rank engine to consider stretch as independent dimension. |
+| 2025-03-05 | Creighton code generation | New `creightonCode.ts` module: `generateCreightonCode()` produces deterministic Creighton-compatible observation codes (e.g., 10WLKAD). `classifyFertility()` returns dry/early_fertile/fertile/peak_type classification. |
+| 2025-03-05 | EntryForm — observation model | Removed Mucus Quantity section. Added separate Mucus Stretch section (none/sticky/tacky/stretchy). Renamed "# of Times" to "Observed During the Day" with All Day option. Summary now shows fertility classification instead of raw rank. |
+| 2025-03-05 | PDF export — observation model | Replaced Mucus Quantity column with Stretch column. Added Creighton Code column. Updated frequency display (x1/x2/x3/AD). |
+| 2025-03-05 | Data migration v2 | Automatic migration on app load: `appearance:'stretchy'` → `stretch:'stretchy'`, `timesObserved` → `frequency`, `quantity` removed. Runs once then flags completion. |
+| 2025-03-05 | Calendar coloring update | Peak-type boxes now use light grey (#D6D3CF) background instead of white+teal dot. Confirmed peak day has dark charcoal border (#4A4541). |
+| 2025-03-05 | Entry modal refinements | Removed "Vulva" from "Sensation at Vulva" → now just "Sensation". Added info bubble next to "Notes (Optional)" with PMS/symptom guidance text. |
+| 2026-03-05 | Entry Modal Creighton Refactor | Full Creighton alignment: Sensation expanded to 7 options (dry/damp/wet/shiny/sticky/tacky/stretchy), removed slippery. Appearance changed to multi-select array with 10 Creighton-aligned options. Stretch section removed entirely. Lubricative promotion rule: damp/shiny/wet + lubricative → base codes 10DL/10SL/10WL (peak_type). New base code `4` for shiny sensation. No Creighton codes shown in UI — human-readable labels only; codes stored in backend for future consultant/grid views. |
+| 2026-03-05 | Rules engine v3 | Rewrote rank.ts with new sensation ranks, multi-select appearance boost, and lubricative promotion logic. Rewrote creightonCode.ts with full base code table and multi-select appearance suffix concatenation in Creighton order. |
+| 2026-03-05 | Data migration v3 | Migrates: `slippery` → `wet` + `lubricative`; `stretch` values merged into `sensation`; single `appearance` → `appearances` array. |
+| 2026-03-05 | PDF export update | Replaced Stretch column with Appearance column showing all selected appearances. Updated to use `appearances` array field. |
+| 2026-03-05 | Help screen update | Removed "slippery" from mucus type descriptions. Updated peak day explanation to reference stretchy/lubricative. |
 
 ---
 
