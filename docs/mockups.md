@@ -52,7 +52,7 @@ Place screenshots in `docs/images/` with the filenames below to match the in-app
 
 | Slide | Title | Body |
 |-------|-------|------|
-| 1 | Welcome to Holistic Cycle | This app helps you track daily fertility observations and understand your fertile window while trying to conceive. |
+| 1 | Welcome to Well Within | This app helps you track daily fertility observations and understand your fertile window while trying to conceive. |
 | 2 | What to Observe | Each time you use the bathroom, note the sensation at the vulva and any visible mucus on the tissue. These two observations are all you need. |
 | 3 | When to Observe | Check before and after toileting throughout the day. Make a final check at bedtime. At the end of the day, record the most fertile sign you observed — not just the most recent. |
 | 4 | Start Charting | Your cycle starts on the first day of bleeding. Tap the + Entry button to log your first observation. Let's begin! |
@@ -94,7 +94,7 @@ Layout (top to bottom):
 
 ## Calendar Screen (with Tab Toggle)
 
-Top bar: "Holistic Cycle" title (left), "+ Entry" button + gear icon (right).
+Top bar: "Well Within" title (left), "+ Entry" button + gear icon (right).
 
 Below top bar: **Segmented pill toggle** with two tabs:
 - **Calendar** (active: green fill, white text; calendar icon)

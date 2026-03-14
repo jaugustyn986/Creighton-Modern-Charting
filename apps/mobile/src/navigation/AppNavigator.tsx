@@ -23,7 +23,8 @@ export type RootStackParamList = {
   EngineDemo: undefined;
 };
 
-const ONBOARDING_KEY = 'holistic_cycle_onboarding_done';
+const ONBOARDING_KEY = 'well_within_onboarding_done';
+const ONBOARDING_KEY_LEGACY = 'holistic_cycle_onboarding_done';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 type OnboardingContextValue = { resetOnboarding: () => void };
@@ -38,7 +39,18 @@ export function AppNavigator(): JSX.Element {
 
   useEffect(() => {
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
-      setShowOnboarding(val !== 'true');
+      if (val === 'true') {
+        setShowOnboarding(false);
+        return;
+      }
+      AsyncStorage.getItem(ONBOARDING_KEY_LEGACY).then((legacyVal) => {
+        if (legacyVal === 'true') {
+          AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+          setShowOnboarding(false);
+        } else {
+          setShowOnboarding(true);
+        }
+      });
     });
   }, []);
 
@@ -48,7 +60,7 @@ export function AppNavigator(): JSX.Element {
   }, []);
 
   const resetOnboarding = useCallback(() => {
-    AsyncStorage.removeItem(ONBOARDING_KEY);
+    void AsyncStorage.removeItem(ONBOARDING_KEY).then(() => AsyncStorage.removeItem(ONBOARDING_KEY_LEGACY));
     setShowOnboarding(true);
   }, []);
 

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "modern-creighton-engine": "dist/bin/cli.js"
+    "well-within-engine": "dist/bin/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

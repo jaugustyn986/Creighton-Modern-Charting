@@ -1,4 +1,4 @@
--- Initial schema scaffold for Modern Creighton
+-- Initial schema scaffold for Well Within
 
 create table if not exists users (
   id uuid primary key,

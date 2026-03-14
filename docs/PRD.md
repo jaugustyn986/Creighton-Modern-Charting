@@ -1,4 +1,4 @@
-# Holistic Cycle – Product Requirements Document (MVP)
+# Well Within – Product Requirements Document (MVP)
 
 Version: 1.0  
 Status: Draft  
@@ -8,7 +8,7 @@ Scope: MVP (Trying-to-Conceive Charting Only)
 
 ## 1. Product Vision
 
-Holistic Cycle is a modern mobile application designed to help couples chart fertility observations and understand their fertile window while trying to conceive.
+Well Within is a modern mobile application designed to help couples chart fertility observations and understand their fertile window while trying to conceive.
 
 The application digitizes standardized fertility observation practices while maintaining strict deterministic interpretation rules.
 
@@ -21,7 +21,7 @@ The MVP focuses on:
 
 The system intentionally avoids predictive fertility algorithms and relies exclusively on observed data.
 
-Holistic Cycle is designed to be compatible with the Creighton Model observation method. The charting system, recording fields, and rules engine follow the core Creighton observation and interpretation rules. See [docs/CREIGHTON.md](CREIGHTON.md) for the full method reference, official recording codes, code-to-app field mappings, and compliance notes.
+Well Within is designed to be compatible with the Creighton Model observation method. The charting system, recording fields, and rules engine follow the core Creighton observation and interpretation rules. See [docs/CREIGHTON.md](CREIGHTON.md) for the full method reference, official recording codes, code-to-app field mappings, and compliance notes.
 
 ## 2. Target User
 

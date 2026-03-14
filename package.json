@@ -1,5 +1,5 @@
 {
-  "name": "modern-creighton",
+  "name": "well-within",
   "private": true,
   "version": "0.1.0",
   "workspaces": [
@@ -11,12 +11,12 @@
     "test:coverage": "npm run test:coverage --workspace core-rules-engine",
     "lint": "npm run lint --workspace core-rules-engine",
     "typecheck": "npm run typecheck --workspace core-rules-engine",
-    "start:mobile": "npm run start --workspace modern-creighton-mobile",
-    "mobile:doctor": "npm run doctor --workspace modern-creighton-mobile",
-    "mobile:config:check": "npm run config:check --workspace modern-creighton-mobile",
-    "mobile:preflight:release": "npm run preflight:release --workspace modern-creighton-mobile",
-    "mobile:build:ios:testflight": "npm run build:ios:testflight --workspace modern-creighton-mobile",
-    "mobile:submit:ios:production": "npm run submit:ios:production --workspace modern-creighton-mobile",
+    "start:mobile": "npm run start --workspace well-within-mobile",
+    "mobile:doctor": "npm run doctor --workspace well-within-mobile",
+    "mobile:config:check": "npm run config:check --workspace well-within-mobile",
+    "mobile:preflight:release": "npm run preflight:release --workspace well-within-mobile",
+    "mobile:build:ios:testflight": "npm run build:ios:testflight --workspace well-within-mobile",
+    "mobile:submit:ios:production": "npm run submit:ios:production --workspace well-within-mobile",
     "clean": "node -e \"const fs=require('fs');for(const p of ['node_modules','package-lock.json']){fs.rmSync(p,{recursive:true,force:true});}console.log('cleaned node_modules and package-lock.json');\"",
     "verify:core": "npm test --workspaces && npm run lint && npm run typecheck && npm run test:coverage && npm run build --workspace core-rules-engine && node ./core/rulesEngine/dist/bin/cli.js --fixture core/rulesEngine/fixtures/simple-peak.json",
     "verify:fixtures": "npm run build --workspace core-rules-engine && node -e \"const fs=require('fs'),path=require('path'),{execSync}=require('child_process');const dir='core/rulesEngine/fixtures';fs.readdirSync(dir).filter(f=>f.endsWith('.json')).forEach(f=>{const p=path.join(dir,f);execSync('node core/rulesEngine/dist/bin/cli.js --fixture '+p+' --verify',{stdio:'inherit'});});\""

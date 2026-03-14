@@ -1,6 +1,6 @@
 # Well Within
 
-![CI](https://github.com/OWNER/modern-creighton/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/jaugustyn986/Well-Within-Mobile-App/actions/workflows/ci.yml/badge.svg)
 
 **Well Within** — a privacy-first, deterministic Creighton fertility charting app.
 

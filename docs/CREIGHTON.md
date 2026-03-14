@@ -17,7 +17,7 @@ The Creighton Model FertilityCare System is a standardized, observation-based me
 
 ### What this means for the app
 
-Holistic Cycle digitizes this observation system. The app is designed to be **method-compatible but brand-neutral** — it follows the Creighton observation and interpretation rules without claiming official affiliation. See Section 8 for compliance notes.
+Well Within digitizes this observation system. The app is designed to be **method-compatible but brand-neutral** — it follows the Creighton observation and interpretation rules without claiming official affiliation. See Section 8 for compliance notes.
 
 ### Why charting matters (practitioner context)
 
