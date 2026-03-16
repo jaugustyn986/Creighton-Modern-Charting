@@ -78,16 +78,22 @@ function getDayTextColor(_day: DayInfo): string {
   return TEXT_PRIMARY;
 }
 
+function todayString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function CalendarGrid({ year, month, days, onDayPress, onPrevMonth, onNextMonth }: Props): JSX.Element {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = todayString();
 
   const cells: (DayInfo | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const info = days.find((di) => di.date === dateStr);
-    cells.push(info ?? { date: dateStr, hasEntry: false, isToday: false });
+    cells.push(info ?? { date: dateStr, hasEntry: false, isToday: dateStr === today });
   }
   while (cells.length % 7 !== 0) cells.push(null);
 

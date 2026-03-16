@@ -5,7 +5,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { EntryForm } from '../components/EntryForm';
 import { DailyEntry } from '../../../../core/rulesEngine/src/types';
-import { getDailyEntry, saveDailyEntry, deleteEntry } from '../services/storage';
+import { getDailyEntry, saveDailyEntry, deleteEntry } from '../services/storageV2';
 
 type ScreenRoute = RouteProp<RootStackParamList, 'DailyEntry'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'DailyEntry'>;

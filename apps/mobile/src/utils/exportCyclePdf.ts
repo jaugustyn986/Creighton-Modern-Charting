@@ -38,7 +38,9 @@ function phaseBg(phase: PhaseLabel): string {
 }
 
 const MAX_RANK = 3;
-const MAX_BAR_H = 90;
+const BAR_HEIGHT = 120; // match app MucusChart
+const BAR_WIDTH_PX = 16;
+const COL_WIDTH_PX = 24;
 
 export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean): string {
   const fertileStart = cycle.result.fertileStartIndex !== null
@@ -52,18 +54,36 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
 
   const chartBars = cycle.result.mucusRanks
     .map((rank, i) => {
-      const h = rank !== null ? Math.max((rank / MAX_RANK) * MAX_BAR_H, 4) : 0;
+      const h = rank !== null ? Math.max((rank / MAX_RANK) * BAR_HEIGHT, 4) : 0;
       const color = barColor(rank, cycle.result.phaseLabels[i]);
       const isPeak = cycle.result.peakIndex === i;
       const border = isPeak ? 'border:2px solid #4A4541;' : '';
       const marker = includeIntercourse && cycle.entries[i]?.intercourse ? '🌹' : '';
-      return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:12px;">
+      const dayLabelStyle = isPeak ? 'font-size:10px;color:#4A4541;font-weight:600;margin-top:4px;' : 'font-size:10px;color:#A09A94;margin-top:4px;';
+      return `<div style="display:flex;flex-direction:column;align-items:center;width:${COL_WIDTH_PX}px;margin:0 1px;">
         <span style="font-size:8px;margin-bottom:2px;">${marker}</span>
-        <div style="width:100%;height:${h}px;background:${color};border-radius:3px;${border}"></div>
-        <span style="font-size:7px;color:#A09A94;margin-top:2px;">${i + 1}</span>
+        <div style="height:${BAR_HEIGHT}px;display:flex;align-items:flex-end;justify-content:center;">
+          <div style="width:${BAR_WIDTH_PX}px;height:${h}px;background:${color};border-radius:4px;${border}"></div>
+        </div>
+        <span style="${dayLabelStyle}">${i + 1}</span>
       </div>`;
     })
     .join('');
+
+  const yAxisLabels = `<div style="display:flex;flex-direction:column;justify-content:space-between;height:${BAR_HEIGHT}px;padding-top:0;padding-bottom:0;width:40px;font-size:9px;color:#A09A94;box-sizing:border-box;">
+    <span>3 Peak</span><span>2 Wet</span><span>1 Damp</span><span>0 Dry</span>
+  </div>`;
+
+  const chartSection = `<div style="display:flex;align-items:flex-start;margin-bottom:12px;padding:16px;background:#FDFCFB;border:1px solid #E7E2DE;border-radius:12px;">
+    ${yAxisLabels}
+    <div style="display:flex;flex-direction:row;align-items:flex-end;flex-wrap:nowrap;margin-left:10px;">${chartBars}</div>
+  </div>
+  <div style="display:flex;flex-direction:row;justify-content:center;gap:12px;margin-top:12px;flex-wrap:wrap;">
+    <span style="display:inline-flex;align-items:center;font-size:11px;color:#6F6A65;"><span style="width:10px;height:10px;border-radius:5px;background:${C_DRY};border:1px solid #E7E2DE;margin-right:4px;"></span>Dry</span>
+    <span style="display:inline-flex;align-items:center;font-size:11px;color:#6F6A65;"><span style="width:10px;height:10px;border-radius:5px;background:${C_FERTILE};border:1px solid #E7E2DE;margin-right:4px;"></span>Mucus</span>
+    <span style="display:inline-flex;align-items:center;font-size:11px;color:#6F6A65;"><span style="width:10px;height:10px;border-radius:5px;background:${C_PEAK};border:1px solid #E7E2DE;margin-right:4px;"></span>Peak</span>
+    <span style="display:inline-flex;align-items:center;font-size:11px;color:#6F6A65;"><span style="width:10px;height:10px;border-radius:5px;background:${C_POST_PEAK};border:1px solid #E7E2DE;margin-right:4px;"></span>Post-peak</span>
+  </div>`;
 
   const intercourseHeader = includeIntercourse ? '<th style="padding:6px 8px;text-align:center;">I/C</th>' : '';
 
@@ -107,7 +127,6 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
     .stat { flex: 1; background: #F6F3EF; border: 1px solid #E7E2DE; border-radius: 8px; padding: 12px; text-align: center; }
     .stat-value { font-size: 20px; font-weight: 600; }
     .stat-label { font-size: 10px; color: #6F6A65; margin-top: 4px; }
-    .chart { display: flex; gap: 2px; align-items: flex-end; margin-bottom: 20px; padding: 8px; background: #F6F3EF; border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 11px; }
     th { background: #F5F3F1; padding: 8px; text-align: left; font-weight: 600; border-bottom: 2px solid #E7E2DE; }
     td { border-bottom: 1px solid #F5F3F1; }
@@ -126,7 +145,7 @@ export function buildCyclePdfHtml(cycle: CycleSlice, includeIntercourse: boolean
   </div>
 
   <h2 style="font-size:14px;margin-bottom:8px;">Daily Mucus Pattern</h2>
-  <div class="chart">${chartBars}</div>
+  ${chartSection}
 
   <h2 style="font-size:14px;margin-bottom:8px;">Day-by-Day Observations</h2>
   <table>

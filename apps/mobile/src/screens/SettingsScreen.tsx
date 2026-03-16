@@ -83,7 +83,9 @@ export function SettingsScreen(): JSX.Element {
           </Text>
           {auth?.user ? (
             <>
-              <Text style={styles.syncEmail}>{auth.user.email}</Text>
+              <Text style={styles.syncStatus}>
+                Signed in with email {auth.user.email}
+              </Text>
               <Text style={styles.syncMeta}>
                 Last sync: {formatSyncTime(sync?.lastSyncedAt ?? null)}
               </Text>
@@ -236,7 +238,7 @@ const styles = StyleSheet.create({
   actionChevron: { fontSize: 20, color: TEXT_MUTED },
   dangerRow: { borderTopWidth: 0, marginTop: 4 },
   dangerText: { color: ACCENT_RED },
-  syncEmail: { fontSize: 15, color: TEXT_PRIMARY, marginBottom: 4 },
+  syncStatus: { fontSize: 15, color: TEXT_PRIMARY, marginBottom: 4 },
   syncMeta: { fontSize: 13, color: TEXT_MUTED, marginBottom: 4 },
   syncError: { fontSize: 13, color: ACCENT_RED, marginBottom: 8 },
   versionText: {

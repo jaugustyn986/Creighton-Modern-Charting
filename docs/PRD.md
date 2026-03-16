@@ -424,7 +424,7 @@ The Cycle Detail screen includes an "Export" button in the top-right header. The
 3. A PDF is generated via `expo-print` from an HTML template (`exportCyclePdf.ts`)
 4. The iOS share sheet opens via `expo-sharing`, allowing save to Files, AirDrop, email, print, etc.
 
-PDF content includes: cycle number, date range, summary stats (length, peak day, fertile window, luteal phase), a colored mucus bar chart, and a day-by-day observation table with optional intercourse markers.
+PDF content includes: cycle number, date range, summary stats (length, peak day, fertile window, luteal phase), a colored mucus bar chart, and a day-by-day observation table with optional intercourse markers. The PDF mucus chart matches the in-app MucusChart: same Y-axis labels (3 Peak, 2 Wet, 1 Damp, 0 Dry), 120px bar scale, fixed 16px bar width per day, and legend (Dry, Mucus, Peak, Post-peak).
 
 ### Feature: Settings
 
@@ -522,6 +522,7 @@ Log of implemented features and doc updates for traceability.
 | 2026-03-05 | PDF export update | Replaced Stretch column with Appearance column showing all selected appearances. Updated to use `appearances` array field. |
 | 2026-03-05 | Help screen update | Removed "slippery" from mucus type descriptions. Updated peak day explanation to reference stretchy/lubricative. |
 | 2026-03-05 | Peak chart color consistency | Changed MucusChart and PDF export peak bar color from blue/teal (#0369a1) to warm grey (#D6D3CF), matching calendar coloring. Removed unused `PEAK_ACCENT` color constant. |
+| 2026-03-11 | PDF mucus chart match app | Aligned PDF Daily Mucus Pattern with in-app MucusChart: added Y-axis labels (3 Peak, 2 Wet, 1 Damp, 0 Dry), 120px bar height, fixed 16px/24px column width, fixed-height bar area, and legend (Dry, Mucus, Peak, Post-peak). Single file: `apps/mobile/src/utils/exportCyclePdf.ts`. |
 | 2026-03-05 | Codebase cleanup | Removed unused color constants (PEAK_ACCENT, ACCENT_RED_DARK, BG_CARD_GRADIENT_END). Fixed `catch (e: any)` to `catch (e: unknown)` with proper type guards. Updated always-dry.json fixture to new `appearances` schema. Expanded index.test.ts to cover all 9 exported functions. |
 | 2026-03-05 | Onboarding refresh | Updated all 4 onboarding slides with warmer copy matching the app's UX tone. Added line-art icons above each slide title using new `LineIcon` component. |
 | 2026-03-05 | Line-art icon system | Created `LineIcon.tsx` component with 15 icon variants (cycle, observe, clock, calendar, eye, droplet, sparkle, heart, chart, grid, device, analytics, shield, lock, gear). Pure React Native Views, zero external dependencies. |
