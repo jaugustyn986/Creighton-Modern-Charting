@@ -96,7 +96,7 @@ Before each release run, update and follow:
 - Multi-cycle engine (`core/rulesEngine/src/multiCycle.ts`) splits entries into individual cycles and computes aggregate stats/insights.
 - All UI colors are centralized in `apps/mobile/src/theme/colors.ts`. The palette uses warm neutrals (#F6F3EF page, #3F3A36 text, #B89A8B accent) with an 8-point spacing system. Calendar/rules-engine colors are constants and never change.
 - Typography follows a consistent hierarchy: 28/600 title, 21/600 headers, 18/500 month labels, 15/400 body with lineHeight 22.
-- **App logo:** Official logo at `apps/mobile/assets/logo.png` (transparent background). Used on onboarding slide 1 and in the Calendar screen header next to "Well Within". Do not add an opaque background to the asset.
+- **App icon and logo:** A single asset at `apps/mobile/assets/icon-1024.png` is used for the app icon (home screen / App Store), splash screen, and in-app logo (onboarding slide 1 and Calendar header). The image is the Well Within rose on a cream background (#F6F3EF) so it matches the app’s theme. See `docs/APP_ASSETS.md` for details.
 - **Icons:** All UI icons use the `LineIcon` component (`apps/mobile/src/components/LineIcon.tsx`) except the intercourse marker (rose 🌹). See `skills/ux_tone_well_within.md` for iconography rules.
 - Intercourse is marked with a rose emoji (🌹) across the app.
 - RevenueCat and Supabase integration are scaffolded as placeholders only.

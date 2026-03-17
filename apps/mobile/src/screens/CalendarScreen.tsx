@@ -22,7 +22,7 @@ import {
 } from '../theme/colors';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const logoSource = require('../../assets/logo.png');
+const logoSource = require('../../assets/icon-1024.png');
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Calendar'>;
 
@@ -134,7 +134,9 @@ export function CalendarScreen(): JSX.Element {
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
         <View style={styles.titleRow}>
-          <Image source={logoSource} style={styles.topBarLogo} resizeMode="contain" />
+          <View style={styles.logoContainer}>
+            <Image source={logoSource} style={styles.topBarLogo} resizeMode="contain" />
+          </View>
           <Text style={styles.appName}>Well Within</Text>
         </View>
         <Pressable
@@ -224,7 +226,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 16,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center' },
-  topBarLogo: { width: 32, height: 32, marginRight: 8 },
+  logoContainer: { backgroundColor: BG_PAGE, borderRadius: 8, padding: 4, marginRight: 8 },
+  topBarLogo: { width: 32, height: 32, backgroundColor: 'transparent' },
   appName: { fontSize: 28, fontWeight: '600', color: BRAND_NAME, letterSpacing: -0.2 },
   gearBtn: { padding: 8 },
   helpLink: {

@@ -24,7 +24,7 @@ module.exports = {
     orientation: 'portrait',
     platforms: ['ios'],
     splash: {
-      image: './assets/logo.png',
+      image: './assets/icon-1024.png',
       resizeMode: 'contain',
       backgroundColor: '#F6F3EF',
     },

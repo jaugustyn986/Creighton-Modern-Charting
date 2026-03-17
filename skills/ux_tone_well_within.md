@@ -405,4 +405,4 @@ Design rules for icons:
 
 When adding new icons, add a new variant to the `IconName` type and a corresponding render function in `LineIcon.tsx`. Keep shapes geometric and minimal -- circles, rounded rectangles, lines, and simple transforms only.
 
-**App logo.** The official Well Within logo is a bitmap asset at `apps/mobile/assets/logo.png`. It is used on onboarding slide 1 and in the main app header (CalendarScreen) next to the "Well Within" title. The logo file **must have a transparent background** (no opaque fill) so it overlays the app's background colors (`BG_CARD`, `BG_PAGE`) cleanly. Do not introduce a solid background into the logo asset.
+**App logo.** The official Well Within logo is a single bitmap asset at `apps/mobile/assets/icon-1024.png`. It is the stylized rose on a cream background (#F6F3EF) matching the app’s `BG_PAGE`. The same asset is used for: the app icon (home screen / App Store), splash screen, onboarding slide 1, and the CalendarScreen header next to "Well Within". When updating, replace `icon-1024.png` with a 1024×1024 PNG (rose on cream); do not use transparency for the icon (store requirements). See `docs/APP_ASSETS.md`.

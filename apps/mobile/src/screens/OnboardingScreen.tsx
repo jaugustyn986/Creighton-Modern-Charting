@@ -11,13 +11,13 @@ import {
   type ViewToken,
 } from 'react-native';
 import {
-  BG_CARD, ACCENT_WARM, BORDER_CARD,
+  BG_CARD, BG_PAGE, ACCENT_WARM, BORDER_CARD,
   TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
 } from '../theme/colors';
 import { LineIcon, type IconName } from '../components/LineIcon';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const logoSource = require('../../assets/logo.png');
+const logoSource = require('../../assets/icon-1024.png');
 
 interface Props {
   onComplete: () => void;
@@ -81,9 +81,9 @@ export function OnboardingScreen({ onComplete }: Props): JSX.Element {
     }
   };
 
-  const renderItem = ({ item }: ListRenderItemInfo<Slide>) => (
+  const   renderItem = ({ item }: ListRenderItemInfo<Slide>) => (
     <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
-      <View style={styles.iconArea}>
+      <View style={[styles.iconArea, item.icon === 'logo' && styles.logoContainer]}>
         {item.icon === 'logo' ? (
           <Image source={logoSource} style={styles.logo} resizeMode="contain" />
         ) : (
@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   iconArea: { marginBottom: 32 },
-  logo: { width: 160, height: 160 },
+  logoContainer: { backgroundColor: BG_PAGE, borderRadius: 20, padding: 16 },
+  logo: { width: 160, height: 160, backgroundColor: 'transparent' },
   slideTitle: {
     fontSize: 28, fontWeight: '600', color: TEXT_PRIMARY,
     textAlign: 'center', marginBottom: 16, letterSpacing: -0.2,

@@ -45,14 +45,14 @@ Build: 1
 
 ## App Icon
 
-- [x] `[INT-BLOCKER]` icon asset exists and resolves from Expo config
+- [x] `[INT-BLOCKER]` icon asset exists and resolves from Expo config (`apps/mobile/assets/icon-1024.png`)
 - [x] `[STORE-REQ]` 1024x1024 marketing icon exists
-- [x] `[STORE-REQ]` marketing icon has no transparency
-- [ ] `[POLISH]` icon visually matches final branding
+- [x] `[STORE-REQ]` marketing icon has no transparency (rose on cream background)
+- [x] `[POLISH]` icon visually matches final branding (rose on cream; see `docs/APP_ASSETS.md`)
 
 ## Splash Screen
 
-- [x] `[INT-BLOCKER]` splash screen configured
+- [x] `[INT-BLOCKER]` splash screen configured (uses same `icon-1024.png`; see `docs/APP_ASSETS.md`)
 - [x] `[INT-BLOCKER]` splash image exists
 - [x] `[STORE-REQ]` no placeholder graphics
 
