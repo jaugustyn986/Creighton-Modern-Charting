@@ -32,7 +32,7 @@ Build: 1
 
 ## Project Configuration
 
-- [x] `[INT-BLOCKER]` `app.json` or `app.config.*` exists
+- [x] `[INT-BLOCKER]` `app.config.js` exists (single config source; app.json removed)
 - [x] `[INT-BLOCKER]` app name is correct
 - [x] `[INT-BLOCKER]` app slug is correct
 - [x] `[INT-BLOCKER]` iOS bundle identifier is defined
@@ -224,17 +224,17 @@ Notes:
 
 # 14. Current Release Status (Update Every Audit)
 
-Build Status: UPLOADED (awaiting Apple processing)  
+Build Status: SUBMITTED (build 9, version 0.1.0)  
 TestFlight Upload: COMPLETE  
-Internal Testing: NEXT (add testers after build finishes processing)  
+Internal Testing: NEXT (add testers in App Store Connect after Apple processing ~5–10 min)  
 External Testing: PLANNED
 
 TestFlight: https://appstoreconnect.apple.com/apps/6760519448/testflight/ios
 
-Last Audit Date: 2026-03-12  
+Last Audit Date: 2026-03-17  
 Audited By: Cursor Agent
 
-First binary successfully uploaded via EAS Submit. Submit is non-interactive with `eas.json` configured (`ascAppId` 6760519448, App Store Connect API key in `apps/mobile/credentials/`). Smoke flow and health-claims copy were audited earlier; manual smoke run still recommended before marking stability items complete.
+Build 9 pushed via `npm run mobile:build:ios:testflight` and `npm run mobile:submit:ios:production` (both use --non-interactive / --latest). Config is in `app.config.js` only; expo-auth-session and expo-linking aligned to SDK 54.
 
 ---
 

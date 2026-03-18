@@ -189,10 +189,9 @@ Build time varies by queue and machine availability.
 
 After build completion, submit using the same profile intent.
 
-npx eas submit --platform ios --profile production
+npx eas submit --platform ios --profile production --latest --non-interactive
 
-
-This uploads the build to App Store Connect.
+This uploads the latest build to App Store Connect. For scripted/CI runs, use `--latest --non-interactive` so no prompts appear.
 
 Required values:
 
