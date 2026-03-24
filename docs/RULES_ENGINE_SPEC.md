@@ -120,6 +120,92 @@ Derived from the base code:
 - `phaseLabels[]`
 - `mucusRanks[]`
 
+## Current cycle summary (calendar banner)
+
+The mobile calendar header shows a deterministic **`CurrentCycleSummary`** from `buildCurrentCycleSummary` in `core/rulesEngine/src/currentCycleSummary.ts` (exported as `core-rules-engine`). Copy and interpretation live in the engine; the UI only lays out fields and maps **`summaryTone`** to background tokens.
+
+**Inputs (last `CycleSlice` only)**
+
+- `entries` — that slice’s `DailyEntry[]` (same slice as `splitIntoCycles` + `recalculateCycle` for that slice).
+- `result` — `CycleResult` for that slice.
+- `status` — slice `status`: `complete` | `in_progress` | `no_peak`.
+- `todayIndex` — index within the slice for calendar “today”, or `null` if today has no row in that slice.
+- `calendarAsOfDate` (optional, YYYY-MM-DD) — device “today” when building the summary in the app. Used for completeness trailing gaps (see below). Omitted in tests or non-UI callers that only need interior-gap / explicit-missing behavior without trailing.
+
+**Focus row**
+
+- `focusIndex = todayIndex` when `todayIndex !== null`, otherwise `entries.length - 1` (last logged day in the slice).
+- When `todayIndex === null` and the slice is non-empty, **`focusQualification`** is: **`No entry today. Showing your last logged day.`**
+
+**Headline priority (deterministic)**
+
+1. Missing data at the focus row (`missing: true` or phase `missing`) → observation-needed headline.
+2. Slice `status === 'no_peak'` → **Peak not yet identified** (no “late cycle” threshold).
+3. Phase `fertile_unconfirmed_peak` → **Pattern not yet clear**.
+4. Otherwise phase-derived headline: present-state first — **`p_plus_3`** uses **Post-peak phase** (same as **`post_peak`**), not “Peak day identified”; **`peak_confirmed`**, **`p_plus_1`**, **`p_plus_2`** use **Peak day identified**; **`dry`** uses shortened **Dry pattern**; see `headlineFromPhase` in code.
+5. Safe fallback string if needed.
+
+**Completeness (calendar-aligned)**
+
+The completeness total is the sum of three parts (no double-counting: a calendar day is either represented by a stored row or it is not).
+
+1. **Explicit missing rows** — count entries in the slice with `entry.missing === true`.
+2. **Interior calendar gaps** — for each calendar day from the slice’s first logged date through its last logged date (inclusive), count days that have **no** stored row in the slice (empty calendar cells between logged days).
+3. **Trailing gaps (in-progress slices only)** — when `status !== 'complete'` and `calendarAsOfDate` is provided and the last logged date in the slice is **before** `calendarAsOfDate`, count each calendar day from the day after the last logged date through `calendarAsOfDate` (inclusive) that has no stored row. This matches “no entry” cells after the user’s last log through today. For `status === 'complete'`, trailing gaps are not applied (historical slice end is not extended to the device date).
+
+Date arithmetic uses ISO `YYYY-MM-DD` strings as local calendar dates (same convention as stored entry dates).
+
+**Confidence (Requirement 2 — Summary Confidence Indicator)**
+
+- Field **`confidence`** is **only** a deterministic tier line: `High confidence`, `Moderate confidence`, or `Low confidence`, plus an **em dash variant**. The High variant is **`High confidence — Peak confirmed`** (capital **P** on Peak). The UI must not infer or rewrite confidence.
+- **Recent window:** indices `max(0, focusIndex - 2)` through `focusIndex` (inclusive). If the **focus row** is incomplete (`missing` / phase `missing`), confidence is **Low — missing observations**. Else if **any** day in the recent window has `entry.missing === true` or phase `missing`, confidence is **Low — recent observations missing** (High tier is never used in that case).
+- **Rule order (first match wins after Low checks):** `no_peak` status → Moderate — pattern still forming; `fertile_unconfirmed_peak` → Moderate — pattern still forming; `p_plus_1` / `p_plus_2` → Moderate — pattern still forming; `peak_confirmed` / `p_plus_3` / `post_peak` → High — Peak confirmed; `fertile_open` / `dry` / `previous_cycle` → Moderate — pattern still forming; default → Moderate — pattern still forming.
+
+**Completeness line (tightened copy)**
+
+- **0** per completeness total above: **`No missing entries this cycle`**
+- **1:** **`1 missing entry this cycle`**
+- **N:** **`N missing entries this cycle`**
+- Empty slice uses a separate short completeness string (see implementation).
+
+**Guidance and `supportingContext`**
+
+- Primary explanatory copy for each branch lives in **`guidance`** (one short, Creighton-aware line; deterministic table in `buildCurrentCycleSummary`).
+- **`supportingContext`** is normally **`''`** so the card stays scannable; reserved for an optional future extra line without duplicating `guidance`.
+- No separate banner “chart signal” line; calendar/PDF still use **Dry/Damp/Wet/Peak-type** via `mucusChartStrengthLabel` where applicable.
+
+**Banner field order (mobile)**
+
+1. `focusQualification` (if any) — subordinate styling (smaller / muted)  
+2. `headline`  
+3. `confidence`  
+4. `cycleDay` (if any) — label **Cycle Day** {n}  
+5. `completeness`  
+6. `supportingContext` (omitted when empty)  
+7. `guidance` — optional subtle top border above this row
+
+**Tone**
+
+- Engine emits `summaryTone`: `neutral` | `caution` | `positive` (no hex). UI maps to `BANNER_TONE_*` / `BG_CARD_GRADIENT_START` in `apps/mobile/src/theme/colors.ts`.
+
+**Manual QA matrix**
+
+| Scenario | Expect |
+|----------|--------|
+| No entries | Empty-state summary; no `focusQualification`. |
+| Today in last slice, charted | `focusQualification` null; headline follows phase/status rules. |
+| Today not in last slice (non-empty slice) | Non-null `focusQualification`; focus = last row. |
+| `entry.missing` on focus day | Observation-needed headline; caution tone; **Low confidence — missing observations**. |
+| Missing in recent window, focus complete | **Low confidence — recent observations missing**. |
+| Slice `no_peak`, focus charted | **Peak not yet identified**; caution tone; Moderate confidence. |
+| Confirmed peak, P+1–P+2 | **Peak day identified**; Creighton-aware **guidance** only; Moderate confidence. |
+| P+3 | **Post-peak phase** headline; **guidance** `Three days past Peak confirm the post-Peak phase.`; High — Peak confirmed. |
+| Post-peak | **Post-peak phase** headline; short post-Peak **guidance**; High — Peak confirmed when recent window intact. |
+| Several `missing: true` in slice | Completeness line includes them in the total. |
+| Interior date gap (no row between first and last logged dates in slice) | Completeness line count includes those days. |
+| Last log before `calendarAsOfDate`, slice not `complete` | Completeness includes unlogged days from day after last log through `calendarAsOfDate`. |
+| Slice `complete` | No trailing gap count after last logged date (only explicit missing + interior gaps within first→last span). |
+
 ## Rules Engine Verification Examples
 
 This section provides reference cycles used to verify the correctness of the rules engine.

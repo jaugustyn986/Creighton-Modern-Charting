@@ -20,7 +20,7 @@ Screens should only:
 
 Primary screens:
 
-Calendar Screen — multi-cycle aware, uses useCycleHistory for per-cycle rendering. Includes SegmentedToggle to switch between Calendar and Cycle History tabs inline.
+Calendar Screen — multi-cycle aware, uses useCycleHistory for per-cycle rendering. Includes SegmentedToggle to switch between Calendar and Cycle History tabs inline. PeakAlignedOverlay lists **completed** cycles with confirmed peak only, peak-aligned.
 Daily Entry Screen — observation form with keyboard-avoiding notes
 Cycle Detail Screen — per-cycle mucus chart, fertile timeline, daily log. Custom header with Export button for PDF generation.
 Settings Screen — privacy info, JSON export, clear all data, app version

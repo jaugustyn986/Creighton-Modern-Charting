@@ -1,23 +1,25 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useCycleData } from '../hooks/useCycleData';
+import { useCycleHistory } from '../hooks/useCycleHistory';
+import { useCurrentCycleSummaryFromCycles } from '../hooks/useCurrentCycleSummary';
 import { MucusChart } from '../components/MucusChart';
 import { StatusBanner } from '../components/StatusBanner';
-import { PhaseLabel } from 'core-rules-engine';
-
-function todayString(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 export function TimelineScreen(): JSX.Element {
-  const { sortedEntries, result, loading } = useCycleData();
-  const today = todayString();
-  const todayIdx = sortedEntries.findIndex((e) => e.date === today);
-  const todayLabel: PhaseLabel | null = todayIdx >= 0 ? result.phaseLabels[todayIdx] : null;
-  const cycleDay = todayIdx >= 0 ? todayIdx + 1 : null;
+  const { sortedEntries, result, loading, refresh } = useCycleData();
+  const cycleHistory = useCycleHistory();
+  const cycleSummary = useCurrentCycleSummaryFromCycles(cycleHistory.cycles);
 
-  if (loading) {
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+      cycleHistory.refresh();
+    }, [refresh, cycleHistory.refresh]),
+  );
+
+  if (loading || cycleHistory.loading) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.loading}>Loading...</Text>
@@ -36,7 +38,7 @@ export function TimelineScreen(): JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <StatusBanner cycleDay={cycleDay} phaseLabel={todayLabel} />
+        <StatusBanner summary={cycleSummary} />
         <MucusChart
           mucusRanks={result.mucusRanks}
           phaseLabels={result.phaseLabels}

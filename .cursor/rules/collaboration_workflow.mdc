@@ -11,6 +11,7 @@ Jim and agents follow this workflow by default. If Jim skips a step, **call it o
 
 - Work from an explicit spec: a doc path, issue link, or pasted summary of scope and acceptance criteria.
 - If there is no spec and Jim did not waive the rule, **stop and ask** for it before writing or changing code.
+- To **shape** a rough idea into intent, requirements, architecture placement, acceptance criteria, and ticket split (planning-only, no code), use `skills/product_planning_well_within.md`.
 
 ## 2. One bounded task per turn
 

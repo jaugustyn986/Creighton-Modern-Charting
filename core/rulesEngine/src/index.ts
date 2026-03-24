@@ -7,3 +7,4 @@ export * from './multiCycle';
 export * from './creightonCode';
 export * from './observationEducationCopy';
 export * from './cycleComparisonSummary';
+export * from './currentCycleSummary';

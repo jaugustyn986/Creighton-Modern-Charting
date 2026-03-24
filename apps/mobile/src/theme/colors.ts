@@ -9,6 +9,10 @@ export const BG_MISSING = '#F5F3F1';
 export const BG_PEAK_TYPE = '#D6D3CF';   // light warm grey for peak-type mucus
 export const BG_CARD_GRADIENT_START = '#F1EFEA';
 
+/** StatusBanner backgrounds from engine `summaryTone` (warm, low contrast). */
+export const BANNER_TONE_CAUTION_BG = '#F7F0E8';
+export const BANNER_TONE_POSITIVE_BG = '#EDF4F0';
+
 // Indicator dots / accents (calendar -- do not change)
 export const FERTILE_ACCENT = '#16a34a';
 

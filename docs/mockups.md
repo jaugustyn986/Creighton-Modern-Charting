@@ -74,7 +74,7 @@ Layout (top to bottom):
    - Cycles Tracked | Avg Length (days)
    - Avg Peak Day | Avg Luteal Phase (days)
 3. **Pattern Insights** — Bullet list of computed insights (e.g., "Peak day has ranged from day 12–16"). Empty state: "Track at least 2 complete cycles to see pattern insights."
-4. **Peak-Aligned Overlay** — Horizontal rows of colored cells (one row per cycle), aligned at peak day (column 0). Colors match the calendar grid (green=dry, red=bleeding, blue dot=peak, yellow=post-peak). Empty state: "Complete a cycle with a confirmed peak to see the overlay."
+4. **Peak-Aligned Overlay** — Horizontal rows of colored cells (one row per **completed** cycle with confirmed peak), aligned at peak day (column **P**). Colors match the calendar grid (green=dry, red=bleeding, blue dot=peak, yellow=post-peak). Empty state: complete a cycle with a confirmed peak to see the overlay.
 5. **Cycle Cards** — Scrollable list of cards (newest first). Each card shows: cycle number, start date, length, peak day, luteal phase, and status badge (Complete / In Progress / No Peak). Tapping a card navigates to Cycle Detail. *(Engine: `splitIntoCycles` merges a leading stretch of non–heavy/moderate days into the first period cycle so cards do not include a spurious 1-day “cycle” before real flow.)*
 
 ## Cycle Detail

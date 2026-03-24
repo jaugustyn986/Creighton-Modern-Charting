@@ -5,6 +5,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useCycleData } from '../hooks/useCycleData';
 import { useCycleHistory } from '../hooks/useCycleHistory';
+import { useCurrentCycleSummaryFromCycles } from '../hooks/useCurrentCycleSummary';
 import { StatusBanner } from '../components/StatusBanner';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { TodayEntryCard } from '../components/TodayEntryCard';
@@ -68,23 +69,17 @@ export function CalendarScreen(): JSX.Element {
     ? cycleHistory.cycles[cycleHistory.cycles.length - 1]
     : null;
 
-  const { todayRank, todayLabel, cycleDay } = useMemo(() => {
+  const cycleSummary = useCurrentCycleSummaryFromCycles(cycleHistory.cycles);
+
+  const todayRank = useMemo(() => {
     if (currentCycleSlice) {
       const idx = currentCycleSlice.entries.findIndex((e) => e.date === today);
       if (idx >= 0) {
-        return {
-          todayRank: currentCycleSlice.result.mucusRanks[idx],
-          todayLabel: currentCycleSlice.result.phaseLabels[idx] as PhaseLabel | null,
-          cycleDay: idx + 1,
-        };
+        return currentCycleSlice.result.mucusRanks[idx];
       }
     }
     const idx = sortedEntries.findIndex((e) => e.date === today);
-    return {
-      todayRank: idx >= 0 ? result.mucusRanks[idx] : null,
-      todayLabel: idx >= 0 ? (result.phaseLabels[idx] as PhaseLabel | null) : null,
-      cycleDay: idx >= 0 ? idx + 1 : null,
-    };
+    return idx >= 0 ? result.mucusRanks[idx] : null;
   }, [currentCycleSlice, sortedEntries, result, today]);
 
   const dayInfos = useMemo(() => {
@@ -120,7 +115,7 @@ export function CalendarScreen(): JSX.Element {
     [navigation],
   );
 
-  if (loading) {
+  if (loading || cycleHistory.loading) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.loading}>Loading...</Text>
@@ -153,7 +148,7 @@ export function CalendarScreen(): JSX.Element {
       <ScrollView>
         {activeTab === 'calendar' ? (
           <>
-            <StatusBanner cycleDay={cycleDay} phaseLabel={todayLabel} />
+            <StatusBanner summary={cycleSummary} />
 
             <CalendarGrid
               year={viewMonth.year}

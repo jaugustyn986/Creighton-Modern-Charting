@@ -12,6 +12,9 @@ When working in this repo, read and follow the guidance in the `skills/` folder.
 - **Human–agent workflow** — `.cursor/rules/collaboration_workflow.mdc`  
   Spec before code, one bounded task, list files before edits, data-model assumptions before persistence, test plan + manual QA per change, diff-first for auth/db/sync/privacy, separate prompts for implement / cleanup / verify; agent calls out if steps are skipped.
 
+- **Product and planning (no code yet)** — `skills/product_planning_well_within.md`  
+  **Reference when the user is shaping features, requirements, UX/engine boundaries, acceptance criteria, or tickets before implementation.** BA + product engineer + planner role; output format and guardrails. Complements collaboration workflow (which expects a spec); does not replace domain, rules engine, or UX tone skills.
+
 - **Fertility logic and wording** — `skills/fertility_charting_domain.md`  
   Use only observable, deterministic rules. No prediction, ML, or proprietary branding.
 
@@ -38,5 +41,7 @@ When working in this repo, read and follow the guidance in the `skills/` folder.
 
 - **Expo iOS release** — `skills/expo_release_commands.md`  
   **Reference when building or submitting to TestFlight.** EAS setup, `eas build --platform ios`, `eas submit --platform ios`, build number management, and release workflow. Use with the readiness checklist and App Store skill.
+
+Before **planning** a new feature or flow (without coding), read `skills/product_planning_well_within.md` together with any domain/UX/engine skills the topic touches.
 
 Before changing fertility behavior, the rules engine, or mobile screens, re-read the relevant skill file(s).

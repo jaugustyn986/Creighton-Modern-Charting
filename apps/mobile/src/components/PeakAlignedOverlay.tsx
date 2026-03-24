@@ -34,15 +34,12 @@ function getCellDotColor(rank: number | null, phase: string, bleeding: boolean):
   return null;
 }
 
-function hasPeakForOverlay(c: CycleSlice): boolean {
-  return (
-    c.peakDay !== null &&
-    (c.status === 'complete' || c.status === 'in_progress')
-  );
+function isCompletedWithPeak(c: CycleSlice): boolean {
+  return c.status === 'complete' && c.peakDay !== null;
 }
 
 export function PeakAlignedOverlay({ cycles, onCyclePress }: Props): JSX.Element {
-  const peakCycles = cycles.filter(hasPeakForOverlay).slice(-6);
+  const peakCycles = cycles.filter(isCompletedWithPeak).slice(-6);
 
   if (peakCycles.length === 0) {
     return (
@@ -50,7 +47,7 @@ export function PeakAlignedOverlay({ cycles, onCyclePress }: Props): JSX.Element
         <Text style={styles.heading}>Peak-Aligned Overlay</Text>
         <View style={styles.card}>
           <Text style={styles.emptyText}>
-            Overlay will appear once a peak day is recorded, so you can compare your current cycle with past ones.
+            Complete a cycle with a confirmed peak to see the overlay and compare past cycles here.
           </Text>
         </View>
       </View>

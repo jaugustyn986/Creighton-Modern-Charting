@@ -78,6 +78,10 @@ When a user taps a day:
 
 The calendar renders days from ALL cycles correctly, not just the current cycle. `CalendarScreen` uses `useCycleHistory` to look up each day's `phaseLabel` and `mucusRank` from that day's own cycle result. This ensures past-cycle days retain their correct colors (peak-type, mucus dots, post-peak yellow, etc.) instead of being flattened to `'previous_cycle'`.
 
+**Current cycle summary (status card)**
+
+The header card above the grid is driven by **`buildCurrentCycleSummary`** from the rules engine (`core-rules-engine`), using the **last cycle slice only** (same source as the active cycle in multi-cycle logic). It is not a second, whole-chart `recalculateCycle` interpretation. The card shows headline, confidence, chart context, cycle day (for the focused row), completeness (explicit `missing` rows plus calendar gaps aligned with empty grid cells—see `docs/RULES_ENGINE_SPEC.md`), and guidance. When today is not logged in that slice, a **`focusQualification`** line states that the summary reflects the last logged day. Copy avoids ovulation certainty and filler labels such as “Tracking.” See `docs/RULES_ENGINE_SPEC.md` — Current cycle summary.
+
 **Calendar indicators**
 
 Days may display the following visual states (colors from shared theme):
@@ -344,7 +348,7 @@ The app must provide a Cycle History screen accessible from the Calendar screen.
 
 - **Cycle Summary Panel** — 2x2 grid showing: Cycles Tracked, Average Cycle Length (days), Average Peak Day, Average Luteal Phase (days).
 - **Pattern Insights** — Bullet-point list of computed insights (peak day range, fertile window start, luteal phase average, cycle consistency). Requires at least 2 completed cycles. Empty state shown otherwise.
-- **Peak-Aligned Overlay** — Last 3–6 completed cycles shown as rows of colored cells, aligned on peak day (column 0). Cell colors match the calendar grid exactly (shared theme). Tapping a row navigates to Cycle Detail.
+- **Peak-Aligned Overlay** — Last 3–6 **completed** cycles with a confirmed peak, shown as rows of colored cells aligned on peak day (column **P**). Cell colors match the calendar grid exactly (shared theme). Tapping a row navigates to Cycle Detail. In-progress and no-peak cycles are excluded (current-cycle comparison may be handled separately).
 - **Cycle Comparison Cards** — Vertical list of all cycles (newest first). Each card shows cycle number, start date, length, peak day, luteal phase, and a status badge (Complete / In Progress / No Peak). Tapping a card navigates to Cycle Detail.
 
 The app must provide a Cycle Detail screen that shows:
@@ -512,6 +516,7 @@ Log of implemented features and doc updates for traceability.
 | 2026-03-21 | Cycle History — leading-day merge | `splitIntoCycles()` merges leading days with no heavy/moderate bleeding into the first period cycle so the list does not show a bogus one-day cycle (e.g. light/spotting before flow). Tests in `core/rulesEngine/__tests__/multiCycle.test.ts`. Spec: `docs/RULES_ENGINE_SPEC.md`. Dev debugging: `docs/DEV_BUILD_DEBUGGING.md`. |
 | 2026-03-21 | Repo hygiene & docs sync | `core-rules-engine` `package.json` `main`/`types` point to `dist/src/*` (matches `tsc` output). Removed unused `apps/mobile/src/services/storage.ts` (superseded by `storageV2.ts`) and unused `apps/mobile/src/config/revenuecat.ts`. `.gitignore`: `.cursor/debug-*.log`. README + `SYSTEM_OVERVIEW` link dev debugging doc. |
 | 2026-03-21 | Monorepo — `core-rules-engine` imports | Mobile app declares workspace dependency `core-rules-engine`; all engine imports use `from 'core-rules-engine'`. Package exposes `react-native` + `exports` for Metro; `apps/mobile/metro.config.js` watches repo root and fixes `nodeModulesPaths`. Jest `moduleNameMapper` maps the package for tests. |
+| 2026-03-24 | Peak-aligned overlay — completed only | Reverted overlay to **completed** cycles with confirmed peak only (`status === 'complete'`); in-progress / no-peak rows removed pending a separate current-cycle treatment. `PeakAlignedOverlay.tsx`. |
 | 2026-03-05 | Help screen update | Removed "slippery" from mucus type descriptions. Updated peak day explanation to reference stretchy/lubricative. |
 | 2026-03-05 | Peak chart color consistency | Changed MucusChart and PDF export peak bar color from blue/teal (#0369a1) to warm grey (#D6D3CF), matching calendar coloring. Removed unused `PEAK_ACCENT` color constant. |
 | 2026-03-11 | PDF: remove Daily Mucus Pattern chart | Removed the Daily Mucus Pattern chart from the cycle PDF export. The HTML-to-PDF engine (expo-print) did not render the chart reliably (sparse/wrong layout in PDF). PDF now contains cycle stats and day-by-day table only; chart strength is preserved in the day-by-day table. Chart remains in-app on Cycle Detail. `apps/mobile/src/utils/exportCyclePdf.ts`. |

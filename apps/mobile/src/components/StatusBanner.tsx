@@ -1,44 +1,59 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { PhaseLabel } from 'core-rules-engine';
+import type { CurrentCycleSummary, SummaryTone } from 'core-rules-engine';
 import {
   BG_CARD_GRADIENT_START,
-  TEXT_PRIMARY, TEXT_SECONDARY, TEXT_SUBTLE,
+  BANNER_TONE_CAUTION_BG,
+  BANNER_TONE_POSITIVE_BG,
+  BORDER_CARD,
+  TEXT_PRIMARY,
+  TEXT_SECONDARY,
+  TEXT_SUBTLE,
+  TEXT_MUTED,
 } from '../theme/colors';
 
 interface Props {
-  cycleDay: number | null;
-  phaseLabel: PhaseLabel | null;
+  summary: CurrentCycleSummary;
 }
 
-function getStatusInfo(label: PhaseLabel | null): { title: string; message: string; bg: string } {
-  switch (label) {
-    case 'fertile_open':
-      return { title: 'Fertile', message: 'Mucus is present and fertility is elevated.', bg: '#fef3c7' };
-    case 'peak_confirmed':
-      return { title: 'Peak', message: 'Peak Day detected! Ovulation likely occurred within the last 1\u20132 days.', bg: '#fce7f3' };
-    case 'p_plus_1':
-      return { title: 'Peak', message: 'P+1 of 3. Continue observing.', bg: '#fce7f3' };
-    case 'p_plus_2':
-      return { title: 'Peak', message: 'P+2 of 3. One more day.', bg: '#fce7f3' };
-    case 'p_plus_3':
-      return { title: 'Peak', message: 'P+3 confirmed! Fertile window closed.', bg: '#d1fae5' };
-    case 'post_peak':
-      return { title: 'Tracking', message: 'Post-peak phase. Continue daily observations.', bg: '#EDE8E4' };
-    case 'fertile_unconfirmed_peak':
-      return { title: 'Fertile', message: 'Fertile signs present. Peak not yet confirmed.', bg: '#fef3c7' };
+function backgroundForTone(tone: SummaryTone): string {
+  switch (tone) {
+    case 'caution':
+      return BANNER_TONE_CAUTION_BG;
+    case 'positive':
+      return BANNER_TONE_POSITIVE_BG;
     default:
-      return { title: 'Tracking', message: 'Early cycle. Continue daily observations.', bg: BG_CARD_GRADIENT_START };
+      return BG_CARD_GRADIENT_START;
   }
 }
 
-export function StatusBanner({ cycleDay, phaseLabel }: Props): JSX.Element {
-  const info = getStatusInfo(phaseLabel);
+export function StatusBanner({ summary }: Props): JSX.Element {
+  const bg = backgroundForTone(summary.summaryTone);
+  const { cycleDay } = summary;
+  const hasSupportingContext = summary.supportingContext.trim().length > 0;
+
   return (
-    <View style={[styles.container, { backgroundColor: info.bg }]}>
-      {cycleDay !== null && <Text style={styles.cycleDay}>Cycle Day {cycleDay}</Text>}
-      <Text style={styles.title}>{info.title}</Text>
-      <Text style={styles.message}>{info.message}</Text>
+    <View style={[styles.container, { backgroundColor: bg }]}>
+      {summary.focusQualification ? (
+        <Text style={styles.focusQualification}>{summary.focusQualification}</Text>
+      ) : null}
+      <Text style={styles.headline}>{summary.headline}</Text>
+      <Text style={styles.confidence}>{summary.confidence}</Text>
+      {cycleDay !== null ? (
+        <Text style={styles.cycleDay}>Cycle Day {cycleDay}</Text>
+      ) : null}
+      <Text
+        style={[
+          styles.completeness,
+          cycleDay === null ? styles.completenessAfterConfidence : null,
+        ]}
+      >
+        {summary.completeness}
+      </Text>
+      {hasSupportingContext ? (
+        <Text style={styles.supporting}>{summary.supportingContext}</Text>
+      ) : null}
+      <Text style={styles.guidance}>{summary.guidance}</Text>
     </View>
   );
 }
@@ -50,7 +65,58 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 8,
   },
-  cycleDay: { fontSize: 12, fontWeight: '500', color: TEXT_SUBTLE, marginBottom: 2 },
-  title: { fontSize: 21, fontWeight: '600', color: TEXT_PRIMARY },
-  message: { fontSize: 14, fontWeight: '400', color: TEXT_SECONDARY, marginTop: 4, lineHeight: 22 },
+  focusQualification: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: TEXT_MUTED,
+    marginBottom: 6,
+    lineHeight: 16,
+  },
+  headline: {
+    fontSize: 21,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+    letterSpacing: -0.2,
+  },
+  confidence: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: TEXT_SECONDARY,
+    marginTop: 10,
+    lineHeight: 22,
+  },
+  cycleDay: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: TEXT_SUBTLE,
+    marginTop: 10,
+    lineHeight: 22,
+  },
+  completeness: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: TEXT_SUBTLE,
+    marginTop: 8,
+    lineHeight: 22,
+  },
+  completenessAfterConfidence: {
+    marginTop: 10,
+  },
+  supporting: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: TEXT_SECONDARY,
+    marginTop: 10,
+    lineHeight: 22,
+  },
+  guidance: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: TEXT_SECONDARY,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: BORDER_CARD,
+    lineHeight: 22,
+  },
 });

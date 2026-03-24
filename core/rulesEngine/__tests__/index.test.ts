@@ -11,6 +11,7 @@ import {
   mucusChartStrengthLabel,
   buildCycleComparisonNarrative,
   buildCycleComparisonStructured,
+  buildCurrentCycleSummary,
 } from '../src';
 
 describe('package index exports', () => {
@@ -27,5 +28,6 @@ describe('package index exports', () => {
     expect(typeof mucusChartStrengthLabel).toBe('function');
     expect(typeof buildCycleComparisonNarrative).toBe('function');
     expect(typeof buildCycleComparisonStructured).toBe('function');
+    expect(typeof buildCurrentCycleSummary).toBe('function');
   });
 });
