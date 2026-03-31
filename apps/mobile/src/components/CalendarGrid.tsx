@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { PhaseLabel } from 'core-rules-engine';
+import { PhaseLabel, PrimaryDayClass } from 'core-rules-engine';
 import {
   BG_BLEEDING, BG_CARD, BG_DRY, BG_NO_ENTRY, BG_PEAK_TYPE, BG_POST_PEAK,
   FERTILE_ACCENT, PEAK_BORDER,
@@ -13,7 +13,8 @@ interface DayInfo {
   hasEntry: boolean;
   phaseLabel?: PhaseLabel;
   isToday: boolean;
-  bleeding?: boolean;
+  /** Engine primary class; drives color with phase/mucus (not raw bleeding alone). */
+  primaryDayClass?: PrimaryDayClass;
   mucusRank?: number | null;
   intercourse?: boolean;
 }
@@ -33,12 +34,13 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-// Returns the cell background color based on Creighton sticker system:
-// Red sticker → bleeding, Green sticker → dry, White sticker → peak-type mucus,
-// Yellow → post-peak (P+1–P+3), White (no tint) → no entry.
+// Colors follow engine `primaryDayClass` + phase (see docs/RULES_ENGINE_SPEC — bleeding override).
 function getDayBackground(day: DayInfo): string {
-  if (day.bleeding) return BG_BLEEDING;
   if (!day.hasEntry) return BG_NO_ENTRY;
+
+  const pc = day.primaryDayClass;
+  if (pc === 'menstrual_flow' || pc === 'spotting') return BG_BLEEDING;
+  if (pc === 'missing') return BG_NO_ENTRY;
 
   switch (day.phaseLabel) {
     case 'p_plus_1':
@@ -64,12 +66,14 @@ function getDayBackground(day: DayInfo): string {
 }
 
 function getIndicatorColor(day: DayInfo): string | null {
-  if (!day.hasEntry || day.bleeding) return null;
+  if (!day.hasEntry) return null;
+  const pc = day.primaryDayClass;
+  if (pc === 'menstrual_flow' || pc === 'spotting') return null;
   if (day.phaseLabel === 'peak_confirmed') return null;
 
   const rank = day.mucusRank;
   if (rank === null || rank === undefined) return null;
-  if (rank >= 3) return null;
+  if (pc === 'peak_type' || rank >= 3) return null;
   if (rank >= 1) return FERTILE_ACCENT;
   return null;
 }

@@ -140,8 +140,17 @@ If no such day exists, `fertileStartIndex` is `null`.
 - Missing rows **block** peak confirmation when they fall in the P+1–P+3 **calendar** window for the active candidate.  
 - Calendar gaps (no row for a date) are treated like missing for confirmation.  
 - Missing **after** Peak is confirmed does **not** invalidate the confirmed peak; it may reduce certainty in the banner (see Current cycle summary).  
-- **`dataComplete`** — `false` if any `interpretationWarnings` are present **or** any completeness gap is detected for the slice (see implementation).  
-- **`interpretationWarnings`** — deterministic `InterpretationWarningId[]` (closed set), e.g. `missing_blocks_peak_confirmation`, `calendar_gap_blocks_peak_confirmation`, `uncertain_fertile_start`. The UI maps these to copy; the engine does not emit freeform prose.
+- **`dataComplete`** — `true` iff **`interpretationWarnings`** is empty. (Calendar completeness for the banner—explicit missing rows, interior gaps, trailing gaps—is a separate **`buildCurrentCycleSummary`** calculation; it does not flip `dataComplete` on `CycleResult`.)  
+- **`interpretationWarnings`** — deterministic `InterpretationWarningId[]` (closed set):
+
+  | ID | Meaning |
+  |----|--------|
+  | `uncertain_fertile_start` | Fertile start boundary is uncertain because of a missing row or calendar gap between cycle start and first mucus day (`fertileStartReason` may be `uncertain_due_to_missing`). |
+  | `calendar_gap_blocks_peak_confirmation` | A calendar gap in the P+1–P+3 window after the active peak-type candidate blocks Peak confirmation. |
+  | `missing_blocks_peak_confirmation` | A day in that window is `missing: true` or has null rank, blocking confirmation. |
+  | `peak_confirmation_incomplete` | A peak-type candidate exists and Peak is not yet confirmed, but P+1–P+3 are all present as rows with non-null ranks (no gap/missing in that window)—the chart has not yet satisfied strict-lower confirmation. |
+
+  The UI maps these IDs to short, deterministic copy (see **`buildCurrentCycleSummary`** → **`interpretationNotes`**). The engine does not emit freeform prose on `CycleResult`.
 
 ## Bleeding classification (per day)
 
@@ -164,7 +173,7 @@ Each day in the slice has derived:
 
 ## Recalculation
 
-- Recompute ranks, peak, fertile start, bleeding classes, warnings, and cycle labels for all entries whenever any entry changes.  
+- Recompute ranks, peak, fertile start, bleeding classes, primary day class, warnings, and cycle labels for all entries whenever any entry changes.  
 - Same inputs must always return identical outputs.  
 - No network calls and no randomness allowed.
 
@@ -176,8 +185,18 @@ Each day in the slice has derived:
 - `fertileStartIndex`, `fertileStartReason` (`null` if no fertile start)  
 - `fertileEndIndex`  
 - `phaseLabels[]`, `mucusRanks[]`  
+- `mucusDerivedByDay[]` — per day: `rank`, `isPeakType`, `isLubricative`, `isStretchy`, `classification` (`dry` \| `low_mucus` \| `fertile_mucus` \| `peak_type`); derived from ranks and observations for UI/PDF labeling (see `mucusClassification.ts`).  
 - `bleedingClassByDay[]`, `brownBleedingContextByDay[]` (same length as entries)  
-- `dataComplete`, `interpretationWarnings[]`
+- `dataComplete`, `interpretationWarnings[]`  
+- `primaryDayClassByDay[]` — **`PrimaryDayClass`** per day (`missing` \| `menstrual_flow` \| `spotting` \| `dry` \| `mucus_observed` \| `peak_type`). Single source for **calendar color**, **Today’s Observation** copy, and **banner** when mucus rank alone would disagree with bleeding context. Derived in `primaryDayClass.ts` using `bleedingClassByDay` so **post-peak spotting** with mucus resolves to mucus/post-peak **display**, not **`menstrual_flow`**.
+
+### Bleeding override consistency
+
+- **Menstrual flow days** (`bleedingClassByDay` = `cycle_start_flow` or `continuing_menses`) map to **`menstrual_flow`**. Heavy/moderate/light during menses are not interpreted as Peak-type for candidacy or user-facing “peak fertility” copy on that day.  
+- **Peak-type candidacy** (`detectPeak`): indices with **flow bleeding** (`heavy` \| `moderate` \| `light` \| `spotting` per `blocksFertileOpening` in `flowBleeding.ts`) **cannot** be peak-type candidates, even if `mucusRanks[i] === 3`.  
+- **Phase labels**: if a flow day would otherwise carry a fertile/peak sticker phase (`fertile_open`, `fertile_unconfirmed_peak`, `peak_confirmed`, `p_plus_1`–`p_plus_3`), it is coerced to **`dry`** for sticker semantics (not applied to `post_peak`).  
+- **Post-peak spotting** (`post_peak_spotting`): if mucus rank ≥ 1, **`primaryDayClass`** follows mucus tier (`mucus_observed` or `peak_type`); calendar uses green/white/yellow per phase, **not** menstrual red.  
+- **Draft entry preview** (`derivePrimaryDayClassFromEntry`): uses bleeding + rank only; heavy/moderate/light → **`menstrual_flow`** for preview; spotting uses mucus tier when rank ≥ 1.
 
 ## Current cycle summary (calendar banner)
 
@@ -200,7 +219,7 @@ The mobile calendar header shows a deterministic **`CurrentCycleSummary`** from 
 
 1. Missing data at the focus row (`missing: true` or phase `missing`) → observation-needed headline.
 2. Slice `status === 'no_peak'` → **Peak not yet identified** (no “late cycle” threshold).
-3. Phase `fertile_unconfirmed_peak` → **Pattern not yet clear**.
+3. Phase `fertile_unconfirmed_peak` → default headline **Fertile pattern — Peak not confirmed yet** from `headlineFromPhase`. If **`peak_confirmation_incomplete`** is in `interpretationWarnings` and `peakCandidateIndex !== null`, the headline may instead be **Working toward Peak confirmation** (deterministic branch in `buildCurrentCycleSummary`).
 4. Otherwise phase-derived headline: present-state first — **`p_plus_3`** uses **Post-peak phase** (same as **`post_peak`**), not “Peak day identified”; **`peak_confirmed`**, **`p_plus_1`**, **`p_plus_2`** use **Peak day identified**; **`dry`** uses shortened **Dry pattern**; see `headlineFromPhase` in code.
 5. Safe fallback string if needed.
 
@@ -220,17 +239,21 @@ Date arithmetic uses ISO `YYYY-MM-DD` strings as local calendar dates (same conv
 - **Recent window:** indices `max(0, focusIndex - 2)` through `focusIndex` (inclusive). If the **focus row** is incomplete (`missing` / phase `missing`), confidence is **Low — missing observations**. Else if **any** day in the recent window has `entry.missing === true` or phase `missing`, confidence is **Low — recent observations missing** (High tier is never used in that case).
 - **Rule order (first match wins after Low checks):** `no_peak` status → Moderate — pattern still forming; `fertile_unconfirmed_peak` → Moderate — pattern still forming; `p_plus_1` / `p_plus_2` → Moderate — pattern still forming; `peak_confirmed` / `p_plus_3` / `post_peak` → High — Peak confirmed; `fertile_open` / `dry` / `previous_cycle` → Moderate — pattern still forming; default → Moderate — pattern still forming.
 
-**Completeness line (tightened copy)**
+**Completeness line**
 
-- **0** per completeness total above: **`No missing entries this cycle`**
-- **1:** **`1 missing entry this cycle`**
-- **N:** **`N missing entries this cycle`**
+- **0** per completeness total above: **`No gaps in your chart this cycle`**
+- **1:** **`1 day still open in this cycle`**
+- **N:** **`N days still open in this cycle`**
 - Empty slice uses a separate short completeness string (see implementation).
+
+**`interpretationNotes`**
+
+- **`interpretationNotes: string[]`** — Human-readable lines derived **only** from `result.interpretationWarnings` via a fixed template map (`WARNING_COPY` order). Empty when there are no warnings. The mobile status banner renders these between **`supportingContext`** and **`guidance`** (with `interpretationNotes ?? []` for backward compatibility).
 
 **Guidance and `supportingContext`**
 
 - Primary explanatory copy for each branch lives in **`guidance`** (one short, Creighton-aware line; deterministic table in `buildCurrentCycleSummary`).
-- **`supportingContext`** is normally **`''`** so the card stays scannable; reserved for an optional future extra line without duplicating `guidance`.
+- **`supportingContext`** is **`''`** unless there is a peak-type candidate and Peak is not yet confirmed (`peakCandidateIndex !== null` && `!peakConfirmed`), in which case it carries a short line about confirming Peak with the three days after (deterministic string in code).
 - No separate banner “chart signal” line; calendar/PDF still use **Dry/Damp/Wet/Peak-type** via `mucusChartStrengthLabel` where applicable.
 
 **Banner field order (mobile)**
@@ -241,7 +264,8 @@ Date arithmetic uses ISO `YYYY-MM-DD` strings as local calendar dates (same conv
 4. `cycleDay` (if any) — label **Cycle Day** {n}  
 5. `completeness`  
 6. `supportingContext` (omitted when empty)  
-7. `guidance` — optional subtle top border above this row
+7. `interpretationNotes` (each line as its own text block; omitted when empty)  
+8. `guidance` — optional subtle top border above this row
 
 **Tone**
 
@@ -251,8 +275,8 @@ Date arithmetic uses ISO `YYYY-MM-DD` strings as local calendar dates (same conv
 
 - Headlines and guidance should **name the user’s situation** (e.g. missing day blocking Peak confirmation) rather than abstract system nouns (“interpretation,” “validation”).  
 - Prefer **plain language** alongside any reliability line; avoid repeating identical sentence templates for every branch.  
-- **`interpretationWarnings`** drive specific, short explanations; copy is **deterministic** from a closed set of templates (see `InterpretationWarningId` in types).  
-- Iteration: expand the banner copy matrix as new `CycleResult` fields stabilize; UI remains layout-only.
+- **`interpretationWarnings`** on `CycleResult` drive **`interpretationNotes`** in the summary; copy is **deterministic** from a closed set of templates (see `InterpretationWarningId` in types and `WARNING_COPY` in `currentCycleSummary.ts`).  
+- Iteration: expand the banner copy matrix as new `CycleResult` fields stabilize; UI remains layout-only for tone/typography, not inference.
 
 **Manual QA matrix**
 
@@ -271,6 +295,7 @@ Date arithmetic uses ISO `YYYY-MM-DD` strings as local calendar dates (same conv
 | Interior date gap (no row between first and last logged dates in slice) | Completeness line count includes those days. |
 | Last log before `calendarAsOfDate`, slice not `complete` | Completeness includes unlogged days from day after last log through `calendarAsOfDate`. |
 | Slice `complete` | No trailing gap count after last logged date (only explicit missing + interior gaps within first→last span). |
+| `interpretationWarnings` non-empty (e.g. `uncertain_fertile_start`) | `interpretationNotes` lists the matching deterministic lines; banner still follows headline/confidence rules. |
 
 ## Rules Engine Verification Examples
 
@@ -467,6 +492,27 @@ These examples serve as canonical test cases. The engineering implementation mus
 - `fertileEndIndex` = null  
 
 **Explanation:** Peak-quality mucus (rank 3) never occurs, so peak cannot be identified.
+
+---
+
+### Example 7B — Flow bleeding blocks fertile opening
+
+**Purpose:** Verify that **flow** bleeding (`heavy`, `moderate`, `light`, or `spotting`) prevents assigning **`fertileStartIndex`** on that day even when mucus rank ≥ 1; fertile opening is the first non-flow day with mucus after cycle start.
+
+**Input (ISO dates; ranks via `mucusRankOverride` in tests)**
+
+| Date       | Bleeding | Rank |
+|------------|----------|------|
+| 2026-01-01 | heavy    | 0    |
+| 2026-01-02 | light    | 2    |
+| 2026-01-03 | none     | 1    |
+
+**Expected output**
+
+- `fertileStartIndex` = index of 2026-01-03 (third row)  
+- `fertileStartReason` = `first_mucus_after_dry`  
+
+**Explanation:** Day 2 is still a flow day (`light`), so it cannot be fertile start despite rank 2. Day 3 is the first eligible day after flow with mucus.
 
 ---
 

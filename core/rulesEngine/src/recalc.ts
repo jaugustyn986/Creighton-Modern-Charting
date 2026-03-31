@@ -1,15 +1,21 @@
-﻿import { deriveBleedingMetadata } from './bleedingDerive';
+import { deriveBleedingMetadata } from './bleedingDerive';
 import { addDaysIso, compareIsoDate, entryDateOrSynthetic } from './calendar';
+import { blocksFertileOpening } from './flowBleeding';
 import { detectFertileStartDetailed } from './fertileWindow';
+import { deriveMucusDerivedByDay } from './mucusClassification';
+import {
+  derivePrimaryDayClassByDay,
+  phaseCoercedToDryDuringFlow,
+} from './primaryDayClass';
 import { detectPeak } from './peak';
 import { computeMucusRank } from './rank';
 import {
   CycleResult,
   DailyEntry,
+  FertileStartReason,
   InterpretationWarningId,
   PhaseLabel,
 } from './types';
-import type { FertileStartReason } from './types';
 
 interface RecalcOptions {
   debug?: boolean;
@@ -53,25 +59,28 @@ function collectInterpretationWarnings(
   if (peakCandidateIndex !== null && peakIndex === null) {
     const dateToIndex = buildDateToIndex(entries);
     const D = entryDateOrSynthetic(entries[peakCandidateIndex]?.date, peakCandidateIndex);
+    let blockedByGapOrMissing = false;
     for (let k = 1; k <= 3; k += 1) {
       const nextD = addDaysIso(D, k);
       const idx = dateToIndex.get(nextD);
       if (idx === undefined) {
         w.push('calendar_gap_blocks_peak_confirmation');
+        blockedByGapOrMissing = true;
         break;
       }
       if (entries[idx]?.missing || ranks[idx] === null) {
         w.push('missing_blocks_peak_confirmation');
+        blockedByGapOrMissing = true;
         break;
       }
+    }
+    if (!blockedByGapOrMissing) {
+      w.push('peak_confirmation_incomplete');
     }
   }
   return w;
 }
 
-/**
- * RULES ENGINE SPEC: docs/RULES_ENGINE_SPEC.md
- */
 export function recalculateCycle(
   entries: Array<DailyEntry | null>,
   options: RecalcOptions = {},
@@ -79,6 +88,7 @@ export function recalculateCycle(
   const safeEntries: DailyEntry[] = entries.map((e) => e ?? {});
   const phaseLabels: PhaseLabel[] = new Array(safeEntries.length).fill('dry');
   const mucusRanks = safeEntries.map((entry) => computeMucusRank(entry));
+  const mucusDerivedByDay = deriveMucusDerivedByDay(safeEntries, mucusRanks);
   const cycleStartIndex = findCurrentCycleStart(safeEntries);
 
   const { fertileStartIndex, fertileStartReason } = detectFertileStartDetailed(
@@ -166,8 +176,22 @@ export function recalculateCycle(
     }
   }
 
+  for (let i = 0; i < safeEntries.length; i += 1) {
+    if (
+      blocksFertileOpening(safeEntries[i]?.bleeding) &&
+      phaseCoercedToDryDuringFlow(phaseLabels[i])
+    ) {
+      phaseLabels[i] = 'dry';
+    }
+  }
+
+  const primaryDayClassByDay = derivePrimaryDayClassByDay(
+    safeEntries,
+    mucusRanks,
+    bleedingClassByDay,
+  );
+
   if (options.debug) {
-    // eslint-disable-next-line no-console
     console.debug({
       cycleStartIndex,
       mucusRanks,
@@ -187,9 +211,11 @@ export function recalculateCycle(
     fertileEndIndex,
     phaseLabels,
     mucusRanks,
+    mucusDerivedByDay,
     bleedingClassByDay,
     brownBleedingContextByDay,
     dataComplete,
     interpretationWarnings,
+    primaryDayClassByDay,
   };
 }

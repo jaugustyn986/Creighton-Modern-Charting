@@ -7,6 +7,24 @@ function sliceResult(entries: DailyEntry[]) {
 }
 
 describe('buildCurrentCycleSummary', () => {
+  it('surfaces interpretationNotes from engine warnings', () => {
+    const entries: DailyEntry[] = [
+      { date: '2026-01-01', bleeding: 'heavy', mucusRankOverride: 0 },
+      { date: '2026-01-03', bleeding: 'none', mucusRankOverride: 1 },
+    ];
+    const result = sliceResult(entries);
+    const summary = buildCurrentCycleSummary({
+      entries,
+      result,
+      status: 'no_peak',
+      todayIndex: 1,
+    });
+    expect(result.interpretationWarnings).toContain('uncertain_fertile_start');
+    expect(summary.interpretationNotes.length).toBeGreaterThan(0);
+    expect(summary.interpretationNotes[0]).toContain('fertile');
+  });
+
+
   it('returns empty-state summary when there are no entries', () => {
     const r = sliceResult([]);
     const s = buildCurrentCycleSummary({
@@ -22,6 +40,7 @@ describe('buildCurrentCycleSummary', () => {
     expect(s.completeness).toContain('Nothing charted');
     expect(s.focusQualification).toBeNull();
     expect(s.summaryTone).toBe('neutral');
+    expect(s.interpretationNotes).toEqual([]);
   });
 
   it('uses shortened focus qualification when todayIndex is null', () => {
@@ -109,7 +128,7 @@ describe('buildCurrentCycleSummary', () => {
       status: 'no_peak',
       todayIndex: 2,
     });
-    expect(s.completeness).toBe('2 missing entries this cycle');
+    expect(s.completeness).toBe('2 days still open in this cycle');
   });
 
   it('completeness counts calendar gaps between first and last logged dates', () => {
@@ -124,7 +143,7 @@ describe('buildCurrentCycleSummary', () => {
       status: 'no_peak',
       todayIndex: 1,
     });
-    expect(s.completeness).toBe('1 missing entry this cycle');
+    expect(s.completeness).toBe('1 day still open in this cycle');
   });
 
   it('completeness counts unlogged days after last entry through calendarAsOfDate for in-progress cycles', () => {
@@ -139,12 +158,12 @@ describe('buildCurrentCycleSummary', () => {
       todayIndex: 0,
       calendarAsOfDate: '2026-01-04',
     });
-    expect(s.completeness).toBe('3 missing entries this cycle');
+    expect(s.completeness).toBe('3 days still open in this cycle');
   });
 
   it('uses empty supportingContext and guidance for no_peak single day', () => {
     const entries: DailyEntry[] = [
-      { date: '2026-01-01', bleeding: 'heavy', mucusRankOverride: 1 },
+      { date: '2026-01-01', bleeding: 'none', mucusRankOverride: 1 },
     ];
     const result = sliceResult(entries);
     const s = buildCurrentCycleSummary({
@@ -284,6 +303,6 @@ describe('buildCurrentCycleSummary', () => {
       status: 'no_peak',
       todayIndex: 0,
     });
-    expect(s.completeness).toBe('No missing entries this cycle');
+    expect(s.completeness).toBe('No gaps in your chart this cycle');
   });
 });

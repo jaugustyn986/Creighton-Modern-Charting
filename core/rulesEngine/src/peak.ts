@@ -1,4 +1,5 @@
-﻿import { addDaysIso, entryDateOrSynthetic } from './calendar';
+import { addDaysIso, entryDateOrSynthetic } from './calendar';
+import { blocksFertileOpening } from './flowBleeding';
 import { DailyEntry } from './types';
 
 /**
@@ -24,6 +25,7 @@ export function detectPeak(
   const peakTypeIndices: number[] = [];
   for (let i = startIndex; i < n; i += 1) {
     if (entries[i]?.missing) continue;
+    if (blocksFertileOpening(entries[i]?.bleeding)) continue;
     if (ranks[i] === 3) peakTypeIndices.push(i);
   }
 

@@ -1,4 +1,4 @@
-﻿import { syntheticDateForIndex } from '../src/calendar';
+import { syntheticDateForIndex } from '../src/calendar';
 import { detectPeak } from '../src/peak';
 import { DailyEntry } from '../src/types';
 
@@ -46,6 +46,22 @@ describe('detectPeak', () => {
       peakCandidateIndex: 5,
       peakIndex: 5,
       fertileEndIndex: 8,
+    });
+  });
+
+  it('does not treat flow bleeding day as peak-type candidate', () => {
+    const entries: DailyEntry[] = [
+      { date: '2000-01-01', bleeding: 'heavy', mucusRankOverride: 0 },
+      { date: '2000-01-02', bleeding: 'moderate', mucusRankOverride: 3 },
+      { date: '2000-01-03', bleeding: 'none', mucusRankOverride: 2 },
+      { date: '2000-01-04', bleeding: 'none', mucusRankOverride: 1 },
+      { date: '2000-01-05', bleeding: 'none', mucusRankOverride: 0 },
+    ];
+    const ranks = [0, 3, 2, 1, 0];
+    expect(detectPeak(entries, ranks, 0)).toEqual({
+      peakCandidateIndex: null,
+      peakIndex: null,
+      fertileEndIndex: null,
     });
   });
 });

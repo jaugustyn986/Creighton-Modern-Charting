@@ -1,4 +1,4 @@
-﻿export type BleedingType = 'heavy' | 'moderate' | 'light' | 'spotting' | 'none' | 'brown';
+export type BleedingType = 'heavy' | 'moderate' | 'light' | 'spotting' | 'none' | 'brown';
 export type Sensation = 'dry' | 'damp' | 'wet' | 'shiny' | 'sticky' | 'tacky' | 'stretchy';
 export type Appearance = 'none' | 'brown' | 'cloudy' | 'cloudy_clear' | 'gummy' | 'clear' | 'lubricative' | 'pasty' | 'red' | 'yellow';
 export type Frequency = 1 | 2 | 3 | 'all_day';
@@ -31,7 +31,6 @@ export interface DailyEntry {
   frequency?: Frequency;
   missing?: boolean;
   observations?: Observation[];
-  /** Test/fixture only -- bypasses sensation/appearance rank calculation. */
   mucusRankOverride?: number;
 }
 
@@ -43,10 +42,10 @@ export interface CreightonCode {
   fertilityClassification: FertilityClassification;
 }
 
-/** Deterministic warning ids for UI copy mapping (see RULES_ENGINE_SPEC). */
 export type InterpretationWarningId =
   | 'missing_blocks_peak_confirmation'
   | 'calendar_gap_blocks_peak_confirmation'
+  | 'peak_confirmation_incomplete'
   | 'uncertain_fertile_start';
 
 export type FertileStartReason = 'first_mucus_after_dry' | 'uncertain_due_to_missing';
@@ -62,6 +61,29 @@ export type BleedingClass =
 
 export type BrownBleedingContext = 'pre_flow' | 'post_peak' | 'mid_cycle';
 
+/** Bleed-first day classification for calendar color and copy (single source with engine). */
+export type PrimaryDayClass =
+  | 'missing'
+  | 'menstrual_flow'
+  | 'spotting'
+  | 'dry'
+  | 'mucus_observed'
+  | 'peak_type';
+
+export type MucusDayClassification =
+  | 'dry'
+  | 'low_mucus'
+  | 'fertile_mucus'
+  | 'peak_type';
+
+export interface MucusDerivedDay {
+  rank: number | null;
+  isPeakType: boolean;
+  isLubricative: boolean;
+  isStretchy: boolean;
+  classification: MucusDayClassification;
+}
+
 export interface CycleResult {
   peakCandidateIndex: number | null;
   peakIndex: number | null;
@@ -71,8 +93,10 @@ export interface CycleResult {
   fertileEndIndex: number | null;
   phaseLabels: PhaseLabel[];
   mucusRanks: Array<number | null>;
+  mucusDerivedByDay: MucusDerivedDay[];
   bleedingClassByDay: BleedingClass[];
   brownBleedingContextByDay: (BrownBleedingContext | null)[];
   dataComplete: boolean;
   interpretationWarnings: InterpretationWarningId[];
+  primaryDayClassByDay: PrimaryDayClass[];
 }

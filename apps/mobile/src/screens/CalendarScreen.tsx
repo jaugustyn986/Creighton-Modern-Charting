@@ -14,7 +14,7 @@ import { CycleSummaryPanel } from '../components/CycleSummaryPanel';
 import { PatternInsights } from '../components/PatternInsights';
 import { PeakAlignedOverlay } from '../components/PeakAlignedOverlay';
 import { CycleCard } from '../components/CycleCard';
-import { PhaseLabel } from 'core-rules-engine';
+import { PhaseLabel, PrimaryDayClass } from 'core-rules-engine';
 import { LineIcon } from '../components/LineIcon';
 import {
   BG_PAGE, BG_CARD, BORDER_CARD,
@@ -82,8 +82,22 @@ export function CalendarScreen(): JSX.Element {
     return idx >= 0 ? result.mucusRanks[idx] : null;
   }, [currentCycleSlice, sortedEntries, result, today]);
 
+  const todayPrimaryClass = useMemo((): PrimaryDayClass | null => {
+    if (currentCycleSlice) {
+      const idx = currentCycleSlice.entries.findIndex((e) => e.date === today);
+      if (idx >= 0) {
+        return currentCycleSlice.result.primaryDayClassByDay[idx] ?? 'dry';
+      }
+    }
+    const idx = sortedEntries.findIndex((e) => e.date === today);
+    return idx >= 0 ? result.primaryDayClassByDay[idx] ?? 'dry' : null;
+  }, [currentCycleSlice, sortedEntries, result, today]);
+
   const dayInfos = useMemo(() => {
-    const dateMap = new Map<string, { phaseLabel: PhaseLabel; mucusRank: number | null }>();
+    const dateMap = new Map<
+      string,
+      { phaseLabel: PhaseLabel; mucusRank: number | null; primaryDayClass: PrimaryDayClass }
+    >();
 
     for (const slice of cycleHistory.cycles) {
       for (let i = 0; i < slice.entries.length; i++) {
@@ -91,6 +105,7 @@ export function CalendarScreen(): JSX.Element {
         dateMap.set(date, {
           phaseLabel: slice.result.phaseLabels[i],
           mucusRank: slice.result.mucusRanks[i],
+          primaryDayClass: slice.result.primaryDayClassByDay[i],
         });
       }
     }
@@ -103,7 +118,7 @@ export function CalendarScreen(): JSX.Element {
         hasEntry: true,
         phaseLabel: cycleInfo?.phaseLabel ?? result.phaseLabels[idx],
         isToday: date === today,
-        bleeding: entry.bleeding !== undefined && entry.bleeding !== 'none',
+        primaryDayClass: cycleInfo?.primaryDayClass ?? result.primaryDayClassByDay[idx],
         mucusRank: cycleInfo?.mucusRank ?? null,
         intercourse: !!entry.intercourse,
       };
@@ -164,6 +179,7 @@ export function CalendarScreen(): JSX.Element {
             <TodayEntryCard
               entry={todayEntry}
               mucusRank={todayRank}
+              primaryDayClass={todayPrimaryClass}
               date={today}
               onPress={() => navigation.navigate('DailyEntry', { date: today, existingEntry: !!todayEntry })}
             />

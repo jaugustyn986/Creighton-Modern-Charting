@@ -16,6 +16,7 @@ import {
   classifyFertility,
   computeMucusRank,
   DailyEntry,
+  derivePrimaryDayClassFromEntry,
   Frequency,
   Sensation,
 } from 'core-rules-engine';
@@ -106,16 +107,31 @@ export function EntryForm({ initialEntry, date, onSave, onDelete }: Props): JSX.
   const [notes, setNotes] = useState(initialEntry?.notes ?? '');
 
   const rank = useMemo(
-    () => missing ? null : computeMucusRank({ sensation, appearances }),
+    () => (missing ? null : computeMucusRank({ sensation, appearances })),
     [sensation, appearances, missing],
   );
 
-  const classification = useMemo(
-    () => missing ? null : classifyFertility({ sensation, appearances }),
-    [sensation, appearances, missing],
-  );
-
-  const classInfo = classification ? CLASSIFICATION_LABELS[classification] : null;
+  const classInfo = useMemo(() => {
+    if (missing || rank === null) return null;
+    const draft: DailyEntry = { bleeding, sensation, appearances };
+    const primary = derivePrimaryDayClassFromEntry(draft, rank);
+    if (primary === 'menstrual_flow') {
+      return {
+        title: 'Menstrual flow day',
+        desc: 'Bleeding is logged as menstrual flow. Mucus is still recorded but is not interpreted as Peak-type for this day.',
+        hint: 'Record flow and any sensations; continue your daily observations.',
+      };
+    }
+    if (primary === 'spotting') {
+      return {
+        title: 'Spotting',
+        desc: 'Light bleeding or spotting without full flow.',
+        hint: 'Note sensation and appearance alongside spotting.',
+      };
+    }
+    const classification = classifyFertility({ sensation, appearances });
+    return CLASSIFICATION_LABELS[classification] ?? null;
+  }, [missing, rank, bleeding, sensation, appearances]);
 
   const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long',

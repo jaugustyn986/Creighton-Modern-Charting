@@ -31,6 +31,8 @@ export function StatusBanner({ summary }: Props): JSX.Element {
   const bg = backgroundForTone(summary.summaryTone);
   const { cycleDay } = summary;
   const hasSupportingContext = summary.supportingContext.trim().length > 0;
+  const notes = summary.interpretationNotes ?? [];
+  const hasNotes = notes.length > 0;
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
@@ -53,6 +55,13 @@ export function StatusBanner({ summary }: Props): JSX.Element {
       {hasSupportingContext ? (
         <Text style={styles.supporting}>{summary.supportingContext}</Text>
       ) : null}
+      {hasNotes
+        ? notes.map((line, i) => (
+            <Text key={`note-${i}`} style={styles.interpretationNote}>
+              {line}
+            </Text>
+          ))
+        : null}
       <Text style={styles.guidance}>{summary.guidance}</Text>
     </View>
   );
@@ -107,6 +116,13 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: TEXT_SECONDARY,
     marginTop: 10,
+    lineHeight: 22,
+  },
+  interpretationNote: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: TEXT_SECONDARY,
+    marginTop: 8,
     lineHeight: 22,
   },
   guidance: {

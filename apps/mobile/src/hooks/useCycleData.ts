@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { recalculateCycle, CycleResult, DailyEntry } from 'core-rules-engine';
 import {
   getAllEntries,
@@ -20,11 +20,20 @@ interface CycleData {
 }
 
 const EMPTY_RESULT: CycleResult = {
+  peakCandidateIndex: null,
   peakIndex: null,
+  peakConfirmed: false,
   fertileStartIndex: null,
+  fertileStartReason: null,
   fertileEndIndex: null,
   phaseLabels: [],
   mucusRanks: [],
+  mucusDerivedByDay: [],
+  bleedingClassByDay: [],
+  brownBleedingContextByDay: [],
+  dataComplete: true,
+  interpretationWarnings: [],
+  primaryDayClassByDay: [],
 };
 
 export function useCycleData(): CycleData {

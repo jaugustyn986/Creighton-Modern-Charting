@@ -1,4 +1,11 @@
-import { CycleResult, DailyEntry, PhaseLabel } from './types';
+import { addDaysIso, compareIsoDate } from './calendar';
+import {
+  CycleResult,
+  DailyEntry,
+  InterpretationWarningId,
+  PhaseLabel,
+  PrimaryDayClass,
+} from './types';
 
 export type CycleSliceStatus = 'complete' | 'in_progress' | 'no_peak';
 
@@ -17,6 +24,7 @@ export interface CurrentCycleSummary {
   summaryTone: SummaryTone;
   /** Non-null iff today is not in the slice and there is at least one entry. */
   focusQualification: string | null;
+  interpretationNotes: string[];
 }
 
 export interface BuildCurrentCycleSummaryParams {
@@ -49,19 +57,36 @@ function recentWindowHasGap(
   return false;
 }
 
-function compareIsoDate(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
+const WARNING_COPY: Record<InterpretationWarningId, string> = {
+  uncertain_fertile_start:
+    'Where the chart picks up fertile opening, a gap or missing day earlier in the cycle means that boundary is a little less certain.',
+  calendar_gap_blocks_peak_confirmation:
+    'There is a calendar gap in the three days after your Peak-type day, so Peak cannot be confirmed from what is logged yet.',
+  missing_blocks_peak_confirmation:
+    'A missing day in the three days after your Peak-type day means Peak cannot be confirmed until those observations are in.',
+  peak_confirmation_incomplete:
+    'Peak is not confirmed yet — keep logging; the three days after your Peak-type sign need to show the usual post-Peak pattern.',
+};
+
+const WARNING_ORDER: InterpretationWarningId[] = [
+  'uncertain_fertile_start',
+  'calendar_gap_blocks_peak_confirmation',
+  'missing_blocks_peak_confirmation',
+  'peak_confirmation_incomplete',
+];
+
+function buildInterpretationNotes(result: CycleResult): string[] {
+  const seen = new Set<InterpretationWarningId>();
+  const notes: string[] = [];
+  for (const id of WARNING_ORDER) {
+    if (!result.interpretationWarnings.includes(id)) continue;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    notes.push(WARNING_COPY[id]);
+  }
+  return notes;
 }
 
-/** Local-calendar arithmetic for YYYY-MM-DD only (no timezone conversion). */
-function addDaysIso(iso: string, delta: number): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  const dt = new Date(y, m - 1, d + delta);
-  const yy = dt.getFullYear();
-  const mm = String(dt.getMonth() + 1).padStart(2, '0');
-  const dd = String(dt.getDate()).padStart(2, '0');
-  return `${yy}-${mm}-${dd}`;
-}
 
 function eachIsoDayInclusive(from: string, to: string): string[] {
   if (compareIsoDate(from, to) > 0) return [];
@@ -190,7 +215,7 @@ function headlineFromPhase(phase: PhaseLabel): string {
     case 'post_peak':
       return 'Post-peak phase';
     case 'fertile_unconfirmed_peak':
-      return 'Pattern not yet clear';
+      return 'Fertile pattern — Peak not confirmed yet';
     case 'previous_cycle':
       return 'Earlier in this cycle';
     case 'missing':
@@ -219,6 +244,7 @@ export function buildCurrentCycleSummary(
       guidance: 'Log today’s observation when you’re ready to begin.',
       summaryTone: 'neutral',
       focusQualification: null,
+      interpretationNotes: [],
     };
   }
 
@@ -228,6 +254,8 @@ export function buildCurrentCycleSummary(
       : Math.max(0, entries.length - 1);
 
   const phase = result.phaseLabels[focusIndex] ?? 'dry';
+  const primaryClass: PrimaryDayClass =
+    result.primaryDayClassByDay[focusIndex] ?? 'dry';
   const missingCount = countCompletenessMissing({
     entries,
     status,
@@ -246,6 +274,8 @@ export function buildCurrentCycleSummary(
     phase,
   );
 
+  const interpretationNotes = buildInterpretationNotes(result);
+
   let headline: string;
   let guidance: string;
   let summaryTone: SummaryTone;
@@ -255,15 +285,29 @@ export function buildCurrentCycleSummary(
     guidance =
       'Add this day’s observation when you can so your chart stays accurate.';
     summaryTone = 'caution';
+  } else if (primaryClass === 'menstrual_flow') {
+    headline = 'Menstrual flow day';
+    guidance =
+      'This day is logged as menstrual flow. Mucus is still recorded but is not interpreted as Peak-type while flow is selected.';
+    summaryTone = 'neutral';
+  } else if (primaryClass === 'spotting') {
+    headline = 'Spotting';
+    guidance =
+      'Light bleeding or spotting is noted; combine with your mucus signs for a full picture of the day.';
+    summaryTone = 'neutral';
   } else if (status === 'no_peak') {
     headline = 'Peak not yet identified';
     guidance =
       'Keep charting daily; a clear Peak pattern has not appeared on this cycle yet.';
     summaryTone = 'caution';
   } else if (phase === 'fertile_unconfirmed_peak') {
-    headline = 'Pattern not yet clear';
+    headline =
+      result.interpretationWarnings.includes('peak_confirmation_incomplete') &&
+      result.peakCandidateIndex !== null
+        ? 'Working toward Peak confirmation'
+        : headlineFromPhase(phase);
     guidance =
-      'Peak is not confirmed yet; keep noting your most fertile sign each day.';
+      'Keep noting your clearest fertile sign each day until Peak can be confirmed on the chart.';
     summaryTone = 'caution';
   } else {
     headline = headlineFromPhase(phase);
@@ -292,15 +336,25 @@ export function buildCurrentCycleSummary(
     }
   }
 
-  const supportingContext = '';
+  let supportingContext = '';
+  if (
+    !focusMissing &&
+    primaryClass !== 'menstrual_flow' &&
+    primaryClass !== 'spotting' &&
+    result.peakCandidateIndex !== null &&
+    !result.peakConfirmed
+  ) {
+    supportingContext =
+      'Your chart shows a Peak-type day; the next step is confirming it with the usual three days after.';
+  }
 
   let completeness: string;
   if (missingCount === 0) {
-    completeness = 'No missing entries this cycle';
+    completeness = 'No gaps in your chart this cycle';
   } else if (missingCount === 1) {
-    completeness = '1 missing entry this cycle';
+    completeness = '1 day still open in this cycle';
   } else {
-    completeness = `${missingCount} missing entries this cycle`;
+    completeness = `${missingCount} days still open in this cycle`;
   }
 
   return {
@@ -312,5 +366,6 @@ export function buildCurrentCycleSummary(
     guidance,
     summaryTone,
     focusQualification,
+    interpretationNotes,
   };
 }

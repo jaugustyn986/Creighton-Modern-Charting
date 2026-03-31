@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { mucusChartStrengthLabel, DailyEntry } from 'core-rules-engine';
+import { mucusChartStrengthLabel, DailyEntry, PrimaryDayClass } from 'core-rules-engine';
 import {
   BG_CARD, BG_MISSING,
   TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_SUBTLE,
@@ -10,15 +10,28 @@ import {
 interface Props {
   entry: DailyEntry | null;
   mucusRank: number | null;
+  /** From engine `primaryDayClassByDay`; when null, label falls back to rank only. */
+  primaryDayClass?: PrimaryDayClass | null;
   date: string;
   onPress: () => void;
 }
 
-function getMucusLabel(rank: number | null): string {
+function getMucusLabel(rank: number | null, primary: PrimaryDayClass | null | undefined): string {
+  if (primary === 'menstrual_flow') return 'Menstrual flow';
+  if (primary === 'spotting') return 'Spotting';
   return mucusChartStrengthLabel(rank, 'No observation');
 }
 
-function getFertilityHint(rank: number | null): string {
+function getFertilityHint(
+  rank: number | null,
+  primary: PrimaryDayClass | null | undefined,
+): string {
+  if (primary === 'menstrual_flow') {
+    return 'Logged as menstrual flow; mucus is not read as Peak-type for this day.';
+  }
+  if (primary === 'spotting') {
+    return 'Spotting noted; mucus signs show when present.';
+  }
   switch (rank) {
     case 0: return 'Non-fertile day.';
     case 1: return 'Early fertile signs.';
@@ -28,7 +41,7 @@ function getFertilityHint(rank: number | null): string {
   }
 }
 
-export function TodayEntryCard({ entry, mucusRank, date, onPress }: Props): JSX.Element {
+export function TodayEntryCard({ entry, mucusRank, primaryDayClass, date, onPress }: Props): JSX.Element {
   const monthDay = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   return (
@@ -41,7 +54,7 @@ export function TodayEntryCard({ entry, mucusRank, date, onPress }: Props): JSX.
         <View style={styles.body}>
           <View style={styles.tags}>
             <View style={styles.tag}>
-              <Text style={styles.tagText}>{getMucusLabel(mucusRank)}</Text>
+              <Text style={styles.tagText}>{getMucusLabel(mucusRank, primaryDayClass)}</Text>
             </View>
             {entry.intercourse && (
               <View style={[styles.tag, styles.intercourseTag]}>
@@ -49,7 +62,7 @@ export function TodayEntryCard({ entry, mucusRank, date, onPress }: Props): JSX.
               </View>
             )}
           </View>
-          <Text style={styles.hint}>{getFertilityHint(mucusRank)}</Text>
+          <Text style={styles.hint}>{getFertilityHint(mucusRank, primaryDayClass)}</Text>
           <View style={styles.tapRow}>
             <Text style={styles.tapHint}>Tap to edit your observation</Text>
             <Text style={styles.tapArrow}>{'›'}</Text>

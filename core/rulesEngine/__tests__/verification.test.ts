@@ -134,4 +134,15 @@ describe('Spec Verification Examples', () => {
     expect(result.phaseLabels[1]).toBe('previous_cycle');
     expect(result.fertileStartIndex).toBe(4);
   });
+  it('Example 7B — Flow bleeding blocks fertile opening until after flow', () => {
+    const entries: DailyEntry[] = [
+      { date: '2026-01-01', bleeding: 'heavy', mucusRankOverride: 0 },
+      { date: '2026-01-02', bleeding: 'light', mucusRankOverride: 2 },
+      { date: '2026-01-03', bleeding: 'none', mucusRankOverride: 1 },
+    ];
+    const result = recalculateCycle(entries);
+    expect(result.fertileStartIndex).toBe(2);
+    expect(result.fertileStartReason).toBe('first_mucus_after_dry');
+  });
+
 });

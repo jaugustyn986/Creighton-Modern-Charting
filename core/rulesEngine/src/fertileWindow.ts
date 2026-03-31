@@ -1,11 +1,6 @@
-﻿import { addDaysIso, compareIsoDate, entryDateOrSynthetic } from './calendar';
+import { addDaysIso, compareIsoDate, entryDateOrSynthetic } from './calendar';
+import { blocksFertileOpening } from './flowBleeding';
 import { DailyEntry, FertileStartReason } from './types';
-
-const FLOW_BLEEDING = new Set(['heavy', 'moderate', 'light', 'spotting']);
-
-function blocksFertileOpening(bleeding: string | undefined): boolean {
-  return FLOW_BLEEDING.has(bleeding ?? 'none');
-}
 
 function buildDateToIndex(entries: DailyEntry[]): Map<string, number> {
   const m = new Map<string, number>();
