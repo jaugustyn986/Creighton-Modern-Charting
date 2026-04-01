@@ -224,17 +224,18 @@ Notes:
 
 # 14. Current Release Status (Update Every Audit)
 
-Build Status: SUBMITTED (build 9, version 0.1.0)  
-TestFlight Upload: COMPLETE  
-Internal Testing: NEXT (add testers in App Store Connect after Apple processing ~5–10 min)  
+Build Status: SUBMITTED (build **10**, version **0.1.0**)  
+EAS Build ID: `27c3d895-ba3d-4109-8640-a3b3dff567a2` — [Expo build logs](https://expo.dev/accounts/jaugustyn986/projects/modern-creighton/builds/27c3d895-ba3d-4109-8640-a3b3dff567a2)  
+TestFlight Upload: COMPLETE (binary uploaded; Apple processing typically 5–10 min)  
+Internal Testing: NEXT (confirm build 10 appears in App Store Connect, then distribute to internal testers)  
 External Testing: PLANNED
 
 TestFlight: https://appstoreconnect.apple.com/apps/6760519448/testflight/ios
 
-Last Audit Date: 2026-03-17  
+Last Audit Date: 2026-03-31  
 Audited By: Cursor Agent
 
-Build 9 pushed via `npm run mobile:build:ios:testflight` and `npm run mobile:submit:ios:production` (both use --non-interactive / --latest). Config is in `app.config.js` only; expo-auth-session and expo-linking aligned to SDK 54.
+Build 10 pushed via `npm run mobile:build:ios:testflight` and `npm run mobile:submit:ios:production` from repo root (`--profile production`, `--non-interactive`, `--latest` on submit). Auto-increment in `eas.json` production profile. Includes help/onboarding copy alignment, rules-engine education strings, and related doc updates.
 
 ---
 
