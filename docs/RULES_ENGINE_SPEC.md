@@ -278,6 +278,13 @@ Date arithmetic uses ISO `YYYY-MM-DD` strings as local calendar dates (same conv
 - **`interpretationWarnings`** on `CycleResult` drive **`interpretationNotes`** in the summary; copy is **deterministic** from a closed set of templates (see `InterpretationWarningId` in types and `WARNING_COPY` in `currentCycleSummary.ts`).  
 - Iteration: expand the banner copy matrix as new `CycleResult` fields stabilize; UI remains layout-only for tone/typography, not inference.
 
+## In-app help copy (Understanding Your Chart)
+
+Long-form user education for Help and related UI is **not** inlined in the mobile app; it lives in **`core/rulesEngine/src/observationEducationCopy.ts`** and is re-exported from the `core-rules-engine` package so copy stays aligned with engine behavior and this spec.
+
+- **`HELP_STATUS_MESSAGE_SECTIONS`** — Readonly list of `{ title, body }` entries that explain common **status headline themes** (e.g. menstrual flow, tracking, fertile pattern, Peak not confirmed, post-peak, missing observation). This is a **glossary** for learners; live banner **`headline`** strings are produced by **`buildCurrentCycleSummary`** and may use slightly different wording for the same situation.
+- **`HELP_SENSATION_APPEARANCE_BODY`**, **`HELP_WHAT_IS_PEAK_DAY_BODY`**, color-guide strings, and related exports — same module; update here when education copy changes.
+
 **Manual QA matrix**
 
 | Scenario | Expect |

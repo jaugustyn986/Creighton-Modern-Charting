@@ -90,7 +90,7 @@ Before each release run, update and follow:
 - **Cycle History** — (inline tab) summary stats, pattern insights, peak-aligned overlay, cycle cards
 - **Cycle Detail** — per-cycle mucus chart, fertile timeline, daily log. Export to PDF via share sheet (PDF includes cycle stats and day-by-day table; the mucus chart is in-app only).
 - **Settings** — privacy info, JSON data export, clear all data with confirmation, app version
-- **Help** — charting guide, visual calendar color key with actual cell swatches, onboarding replay
+- **Help** — charting guide (copy sourced from `core-rules-engine` / `observationEducationCopy.ts`), visual calendar color key with actual cell swatches, onboarding replay
 - **Onboarding** — 4-slide first-launch flow
 
 ## Notes

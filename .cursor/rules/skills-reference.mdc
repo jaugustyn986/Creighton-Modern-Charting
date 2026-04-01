@@ -30,6 +30,9 @@ When working in this repo, read and follow the guidance in the `skills/` folder.
 - **UX** — `skills/ux_charting_patterns.md`  
   Fast daily entry (&lt;15s), calendar-based flow, simple charts.
 
+- **UX visual composition (premium / art direction)** — `skills/ux_visual_composition_premium.md`  
+  **Reference when hierarchy, restraint, imagery, motion, or landing-style composition matter more than component count.** Complements tone and charting skills; includes Apps + utility-copy defaults for product surfaces and Expo/RN scope notes.
+
 - **Privacy** — `skills/privacy_and_health_data.md`  
   No ad/tracking/analytics SDKs; local-only storage for MVP; user-owned data.
 

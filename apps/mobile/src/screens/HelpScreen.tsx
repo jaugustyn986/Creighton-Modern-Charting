@@ -7,7 +7,10 @@ import {
   HELP_HOW_TO_OBSERVE_TITLE,
   HELP_SENSATION_APPEARANCE_BODY,
   HELP_SENSATION_APPEARANCE_TITLE,
+  HELP_STATUS_MESSAGE_SECTIONS,
   HELP_TRYING_TO_CONCEIVE_BODY,
+  HELP_WHAT_IS_PEAK_DAY_BODY,
+  HELP_WHAT_IS_PEAK_DAY_TITLE,
 } from 'core-rules-engine';
 import { useResetOnboarding } from '../navigation/AppNavigator';
 import { LineIcon, type IconName } from '../components/LineIcon';
@@ -36,12 +39,9 @@ const SECTIONS: AccordionItemData[] = [
     content: HELP_SENSATION_APPEARANCE_BODY,
   },
   {
-    title: 'What is the Peak Day?',
+    title: HELP_WHAT_IS_PEAK_DAY_TITLE,
     icon: 'sparkle',
-    content:
-      'The Peak Day is the last day you observe peak-type mucus (clear, stretchy, or lubricative).\n\n' +
-      'Why it matters: Ovulation typically occurs within 1\u20132 days after the Peak Day. This is your body\'s signal that the egg has been released.\n\n' +
-      'The app uses the P+3 Rule: After Peak Day, you need 3 days of lower-quality mucus to confirm ovulation. Your fertile window ends at P+3.',
+    content: HELP_WHAT_IS_PEAK_DAY_BODY,
   },
   {
     title: 'When should we try to conceive?',
@@ -51,10 +51,7 @@ const SECTIONS: AccordionItemData[] = [
   {
     title: 'What do the status messages mean?',
     icon: 'chart',
-    content:
-      'Tracking: You\'re recording observations but haven\'t yet entered your fertile window.\n\n' +
-      'Fertile: You\'re in your fertile window! Mucus is present and fertility is elevated.\n\n' +
-      'Peak: Peak Day detected! Ovulation likely occurred within the last 1\u20132 days.',
+    renderContent: () => <StatusMessageSections />,
   },
   {
     title: 'Calendar color guide',
@@ -80,6 +77,36 @@ function SwatchRow({ bg, dotColor, borderColor, label }: {
   );
 }
 
+function StatusMessageSections(): JSX.Element {
+  return (
+    <View style={statusHelpStyles.container}>
+      {HELP_STATUS_MESSAGE_SECTIONS.map((section, i) => (
+        <View key={section.title + i} style={statusHelpStyles.block}>
+          <Text style={statusHelpStyles.sectionTitle}>{section.title}</Text>
+          <Text style={statusHelpStyles.sectionBody}>{section.body}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const statusHelpStyles = StyleSheet.create({
+  container: { gap: 18 },
+  block: { gap: 6 },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+    lineHeight: 20,
+  },
+  sectionBody: {
+    fontSize: 15,
+    fontWeight: '400',
+    color: TEXT_SECONDARY,
+    lineHeight: 22,
+  },
+});
+
 function ColorGuideSwatches(): JSX.Element {
   return (
     <View style={swatchStyles.container}>
@@ -90,7 +117,7 @@ function ColorGuideSwatches(): JSX.Element {
       <SwatchRow bg={BG_PEAK_TYPE} label={HELP_COLOR_GUIDE_PEAK_TYPE_MUCUS} />
       <SwatchRow bg={BG_PEAK_TYPE} borderColor={PEAK_BORDER} label="Confirmed Peak Day" />
       <SwatchRow bg={BG_POST_PEAK} label="Post-peak (P+1, P+2, P+3)" />
-      <SwatchRow bg={BG_DRY} borderColor={BORDER_TODAY} label="Today" />
+      <SwatchRow bg={BG_NO_ENTRY} borderColor={BORDER_TODAY} label="Today" />
       <View style={swatchStyles.row}>
         <View style={[swatchStyles.swatch, { borderWidth: 1, borderColor: BORDER_CARD, justifyContent: 'center', alignItems: 'center' }]}>
           <Text style={{ fontSize: 14 }}>{INTERCOURSE_ICON}</Text>

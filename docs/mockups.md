@@ -21,7 +21,8 @@ Peak is only highlighted after P+3 confirmed.
 
 ## Understanding Your Chart
 
-Place screenshot images in `docs/images/` with the filenames below so they render here and live in version control.
+Place screenshot images in `docs/images/` with the filenames below so they render here and live in version control. Copy and section order follow `core/rulesEngine/src/observationEducationCopy.ts` (e.g. status glossary = `HELP_STATUS_MESSAGE_SECTIONS`); refresh screenshots when those strings or accordion layout change materially.
+
 
 ![Understanding Your Chart](images/understanding-your-chart-overview.png)
 

@@ -532,6 +532,7 @@ Log of implemented features and doc updates for traceability.
 | 2026-03-05 | App logo and icon fixes | Official logo asset added at `apps/mobile/assets/logo.png`; used on onboarding slide 1 (160x160) and in CalendarScreen top bar (32x32) next to "Well Within". Observe icon rewritten as tissue-with-droplet; clock icon hands fixed for proper alignment. |
 | 2026-03-05 | Transparent logo background | Removed opaque beige background from logo PNG so the logo overlays the app's background color seamlessly on onboarding and in the main header. Asset remains at `apps/mobile/assets/logo.png`. |
 | 2026-03-05 | Clock icon refinement | Clock icon (onboarding slide 3, Cycle History toggle) finalized: hands at 10:30 and 4:30 with center dot, same stroke as circle, centered in frame. Implemented in `LineIcon` clock variant. |
+| 2026-03-30 | Help & onboarding — engine-aligned copy | Understanding Your Chart: status messages as seven titled sections from `HELP_STATUS_MESSAGE_SECTIONS` (`observationEducationCopy.ts`); sensation/appearance and Peak Day bodies refreshed; onboarding slide 3 adds de-emphasized “Consistency matters” footer. Premium visual-composition skill: `skills/ux_visual_composition_premium.md`; registered in `.cursor/rules/skills-reference.mdc`. |
 
 ---
 

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import {
   BG_CARD, BG_PAGE, ACCENT_WARM, BORDER_CARD,
-  TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
+  TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_SUBTLE,
 } from '../theme/colors';
 import { LineIcon, type IconName } from '../components/LineIcon';
 
@@ -28,6 +28,9 @@ interface Slide {
   icon: IconName | 'logo';
   title: string;
   body: string;
+  /** Secondary block below main body (de-emphasized). */
+  footerTitle?: string;
+  footerBody?: string;
 }
 
 const SLIDES: Slide[] = [
@@ -48,6 +51,9 @@ const SLIDES: Slide[] = [
     icon: 'clock',
     title: 'When to Observe',
     body: 'Check before and after using the bathroom during the day. At night, record the most fertile sign you noticed that day \u2014 not just the most recent one.',
+    footerTitle: 'Consistency matters',
+    footerBody:
+      'Daily observations help the app interpret your cycle correctly. Missing even one day can delay or prevent confirming Peak.',
   },
   {
     id: '4',
@@ -81,7 +87,7 @@ export function OnboardingScreen({ onComplete }: Props): JSX.Element {
     }
   };
 
-  const   renderItem = ({ item }: ListRenderItemInfo<Slide>) => (
+  const renderItem = ({ item }: ListRenderItemInfo<Slide>) => (
     <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
       <View style={[styles.iconArea, item.icon === 'logo' && styles.logoContainer]}>
         {item.icon === 'logo' ? (
@@ -92,6 +98,12 @@ export function OnboardingScreen({ onComplete }: Props): JSX.Element {
       </View>
       <Text style={styles.slideTitle}>{item.title}</Text>
       <Text style={styles.slideBody}>{item.body}</Text>
+      {item.footerTitle != null && item.footerBody != null ? (
+        <View style={styles.slideFooter}>
+          <Text style={styles.slideFooterTitle}>{item.footerTitle}</Text>
+          <Text style={styles.slideFooterBody}>{item.footerBody}</Text>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -150,6 +162,22 @@ const styles = StyleSheet.create({
   },
   slideBody: {
     fontSize: 16, fontWeight: '400', color: TEXT_SECONDARY, textAlign: 'center', lineHeight: 24,
+  },
+  slideFooter: { marginTop: 24, paddingTop: 4, maxWidth: 340 },
+  slideFooterTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: TEXT_SECONDARY,
+    textAlign: 'center',
+    marginBottom: 8,
+    letterSpacing: -0.1,
+  },
+  slideFooterBody: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: TEXT_SUBTLE,
+    textAlign: 'center',
+    lineHeight: 21,
   },
   footer: { paddingHorizontal: 24, paddingBottom: 48, alignItems: 'center' },
   dots: { flexDirection: 'row', marginBottom: 24, gap: 8 },
