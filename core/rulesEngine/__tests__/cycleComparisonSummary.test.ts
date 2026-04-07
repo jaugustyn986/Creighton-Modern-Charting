@@ -72,4 +72,36 @@ describe('buildCycleComparisonStructured', () => {
     const s = buildCycleComparisonStructured(cur, [c1, cur]);
     expect(s.lengthVsPrior).toBe('not_comparable');
   });
+
+  it('computes avgPeakDay from prior completed cycles', () => {
+    const c1 = makeSlice({ cycleNumber: 1, status: 'complete', length: 28, peakDay: 14 });
+    const c2 = makeSlice({ cycleNumber: 2, status: 'complete', length: 30, peakDay: 16 });
+    const cur = makeSlice({ cycleNumber: 3, status: 'in_progress', length: 8, peakDay: null, lutealPhase: null });
+    const s = buildCycleComparisonStructured(cur, [c1, c2, cur]);
+    expect(s.avgPeakDay).toBe(15);
+  });
+
+  it('returns null avgPeakDay when no prior peaks', () => {
+    const c1 = makeSlice({ cycleNumber: 1, status: 'complete', length: 28, peakDay: null, lutealPhase: null });
+    const cur = makeSlice({ cycleNumber: 2, status: 'in_progress', length: 5, peakDay: null, lutealPhase: null });
+    const s = buildCycleComparisonStructured(cur, [c1, cur]);
+    expect(s.avgPeakDay).toBeNull();
+  });
+
+  it('computes avgFertileStartDay from prior results', () => {
+    const resultWithFertile = { ...emptyResult, fertileStartIndex: 7 } as CycleResult;
+    const c1 = makeSlice({ cycleNumber: 1, status: 'complete', length: 28, result: resultWithFertile });
+    const c2 = makeSlice({ cycleNumber: 2, status: 'complete', length: 30, result: { ...emptyResult, fertileStartIndex: 9 } as CycleResult });
+    const cur = makeSlice({ cycleNumber: 3, status: 'in_progress', length: 5, peakDay: null, lutealPhase: null });
+    const s = buildCycleComparisonStructured(cur, [c1, c2, cur]);
+    expect(s.avgFertileStartDay).toBe(9);
+  });
+
+  it('returns null avgFertileStartDay when no prior fertile data', () => {
+    const resultNoFertile = { ...emptyResult, fertileStartIndex: null } as CycleResult;
+    const c1 = makeSlice({ cycleNumber: 1, status: 'complete', length: 28, result: resultNoFertile });
+    const cur = makeSlice({ cycleNumber: 2, status: 'in_progress', length: 5, peakDay: null, lutealPhase: null });
+    const s = buildCycleComparisonStructured(cur, [c1, cur]);
+    expect(s.avgFertileStartDay).toBeNull();
+  });
 });

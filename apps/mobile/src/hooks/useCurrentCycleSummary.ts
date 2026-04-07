@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import {
   buildCurrentCycleSummary,
+  buildCycleComparisonStructured,
   CurrentCycleSummary,
   CycleSlice,
   recalculateCycle,
@@ -32,12 +33,14 @@ export function useCurrentCycleSummaryFromCycles(
     }
     const slice = cycles[cycles.length - 1];
     const todayIdx = slice.entries.findIndex((e) => e.date === today);
+    const baselineComparison = buildCycleComparisonStructured(slice, cycles);
     return buildCurrentCycleSummary({
       entries: slice.entries,
       result: slice.result,
       status: slice.status,
       todayIndex: todayIdx >= 0 ? todayIdx : null,
       calendarAsOfDate: today,
+      baselineComparison,
     });
   }, [cycles]);
 }

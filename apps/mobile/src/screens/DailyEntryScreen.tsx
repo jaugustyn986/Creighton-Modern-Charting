@@ -12,12 +12,19 @@ import { TEXT_SECONDARY } from '../theme/colors';
 type ScreenRoute = RouteProp<RootStackParamList, 'DailyEntry'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'DailyEntry'>;
 
+function previousDateString(isoDate: string): string {
+  const d = new Date(isoDate + 'T12:00:00');
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function DailyEntryScreen(): JSX.Element {
   const route = useRoute<ScreenRoute>();
   const navigation = useNavigation<Nav>();
   const { date } = route.params;
 
   const [existing, setExisting] = useState<DailyEntry | null>(null);
+  const [previousDayEntry, setPreviousDayEntry] = useState<DailyEntry | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useLayoutEffect(() => {
@@ -31,8 +38,12 @@ export function DailyEntryScreen(): JSX.Element {
   }, [navigation]);
 
   useEffect(() => {
-    getDailyEntry(date).then((entry) => {
+    Promise.all([
+      getDailyEntry(date),
+      getDailyEntry(previousDateString(date)),
+    ]).then(([entry, prevEntry]) => {
       setExisting(entry);
+      setPreviousDayEntry(prevEntry);
       setLoaded(true);
     });
   }, [date]);
@@ -52,6 +63,7 @@ export function DailyEntryScreen(): JSX.Element {
   return (
     <EntryForm
       initialEntry={existing}
+      previousDayEntry={previousDayEntry}
       date={date}
       onSave={handleSave}
       onDelete={existing ? handleDelete : undefined}

@@ -76,6 +76,7 @@ Before each release run, update and follow:
 | [docs/RELEASE_PROCESS.md](docs/RELEASE_PROCESS.md) | **Cursor → local Expo → TestFlight → App Store** — when each step is quick vs when it needs more from Apple or takes longer |
 | [docs/prd.md](docs/prd.md) | Product Requirements Document — features, specs, implementation log |
 | [docs/RULES_ENGINE_SPEC.md](docs/RULES_ENGINE_SPEC.md) | Rules engine source of truth — ranking, peak detection, multi-cycle layer |
+| [docs/CURRENT_CYCLE_SUMMARY_MATRIX.md](docs/CURRENT_CYCLE_SUMMARY_MATRIX.md) | Calendar status banner — headlines, confidence, baseline, compact support line (agent-friendly matrix) |
 | [docs/CREIGHTON.md](docs/CREIGHTON.md) | Creighton Method reference — recording codes, sticker colors, compliance |
 | [docs/mockups.md](docs/mockups.md) | Text wireframes and screenshot references |
 | [docs/DEV_ENV_SETUP.md](docs/DEV_ENV_SETUP.md) | Install, `.env`, Expo Go vs dev client, EAS development build |

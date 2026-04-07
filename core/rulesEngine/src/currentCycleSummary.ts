@@ -1,4 +1,5 @@
 import { addDaysIso, compareIsoDate } from './calendar';
+import { CycleComparisonStructured } from './cycleComparisonSummary';
 import {
   CycleResult,
   DailyEntry,
@@ -10,6 +11,13 @@ import {
 export type CycleSliceStatus = 'complete' | 'in_progress' | 'no_peak';
 
 export type SummaryTone = 'neutral' | 'caution' | 'positive';
+
+export type CompactSupportField =
+  | 'guidance'
+  | 'completeness'
+  | 'interpretationNote'
+  | 'baselineContext'
+  | null;
 
 export interface CurrentCycleSummary {
   /** 1-based cycle day for the focused row, or null when there are no entries. */
@@ -25,6 +33,10 @@ export interface CurrentCycleSummary {
   /** Non-null iff today is not in the slice and there is at least one entry. */
   focusQualification: string | null;
   interpretationNotes: string[];
+  /** Tells the compact UI which single support line to render. */
+  compactSupportField: CompactSupportField;
+  /** Historical context from prior cycles (observational, never predictive). */
+  baselineContext: string | null;
 }
 
 export interface BuildCurrentCycleSummaryParams {
@@ -38,6 +50,8 @@ export interface BuildCurrentCycleSummaryParams {
    * empty cells on the calendar grid).
    */
   calendarAsOfDate?: string;
+  /** Prior-cycle comparison data; enables baseline context lines. */
+  baselineComparison?: CycleComparisonStructured;
 }
 
 const FOCUS_QUALIFICATION =
@@ -202,37 +216,96 @@ function computeConfidenceLine(
 function headlineFromPhase(phase: PhaseLabel): string {
   switch (phase) {
     case 'dry':
-      return 'Dry pattern';
+    case 'previous_cycle':
+      return 'Tracking';
     case 'fertile_open':
-      return 'Fertile signs present';
+      return 'Fertile pattern';
     case 'peak_confirmed':
-      return 'Peak day identified';
     case 'p_plus_1':
     case 'p_plus_2':
       return 'Peak day identified';
     case 'p_plus_3':
-      return 'Post-peak phase';
     case 'post_peak':
       return 'Post-peak phase';
     case 'fertile_unconfirmed_peak':
-      return 'Fertile pattern — Peak not confirmed yet';
-    case 'previous_cycle':
-      return 'Earlier in this cycle';
+      return 'Fertile pattern \u2014 Peak not confirmed yet';
     case 'missing':
-      return 'Observation incomplete';
+      return 'Missing observation';
     default:
-      return 'Continue your observations';
+      return 'Tracking';
   }
+}
+
+function buildBaselineContext(
+  phase: PhaseLabel,
+  cycleDay: number,
+  isLowConfidence: boolean,
+  comparison?: CycleComparisonStructured,
+): string | null {
+  if (!comparison) return null;
+  if (isLowConfidence) return null;
+  if (comparison.priorSampleSize < 2) return null;
+
+  switch (phase) {
+    case 'dry':
+    case 'previous_cycle': {
+      const avg = comparison.avgFertileStartDay;
+      if (avg !== null && cycleDay < avg) {
+        return `Your cycles have typically shown fertile signs starting around day ${avg}.`;
+      }
+      return null;
+    }
+    case 'fertile_open': {
+      const avg = comparison.avgPeakDay;
+      if (avg !== null) {
+        return `Peak has usually occurred around day ${avg} in your previous cycles.`;
+      }
+      return null;
+    }
+    case 'fertile_unconfirmed_peak': {
+      const avg = comparison.avgPeakDay;
+      if (avg !== null) {
+        return `Peak has usually occurred around day ${avg} in your previous cycles.`;
+      }
+      return null;
+    }
+    case 'peak_confirmed':
+    case 'post_peak': {
+      if (
+        comparison.peakVsPrior !== 'similar' &&
+        comparison.peakVsPrior !== 'not_comparable'
+      ) {
+        const dir = comparison.peakVsPrior === 'later' ? 'later' : 'earlier';
+        return `Peak occurred ${dir} than your usual pattern.`;
+      }
+      return null;
+    }
+    default:
+      return null;
+  }
+}
+
+function resolveCompactSupportField(
+  isLowConfidence: boolean,
+  focusMissing: boolean,
+  interpretationNotes: string[],
+  missingCount: number,
+  baselineContext: string | null,
+): CompactSupportField {
+  if (focusMissing && interpretationNotes.length > 0) return 'interpretationNote';
+  if (isLowConfidence && missingCount > 0) return 'completeness';
+  if (baselineContext) return 'baselineContext';
+  return 'guidance';
 }
 
 /**
  * Deterministic calendar header summary for the current (last) cycle slice.
- * See docs/RULES_ENGINE_SPEC.md — current cycle summary.
+ * See docs/RULES_ENGINE_SPEC.md and docs/CURRENT_CYCLE_SUMMARY_MATRIX.md (headline/support/baseline matrix).
  */
 export function buildCurrentCycleSummary(
   params: BuildCurrentCycleSummaryParams,
 ): CurrentCycleSummary {
-  const { entries, result, status, todayIndex, calendarAsOfDate } = params;
+  const { entries, result, status, todayIndex, calendarAsOfDate, baselineComparison } = params;
 
   if (entries.length === 0) {
     return {
@@ -245,6 +318,8 @@ export function buildCurrentCycleSummary(
       summaryTone: 'neutral',
       focusQualification: null,
       interpretationNotes: [],
+      compactSupportField: 'guidance',
+      baselineContext: null,
     };
   }
 
@@ -286,7 +361,7 @@ export function buildCurrentCycleSummary(
       'Add this day’s observation when you can so your chart stays accurate.';
     summaryTone = 'caution';
   } else if (primaryClass === 'menstrual_flow') {
-    headline = 'Menstrual flow day';
+    headline = 'Menstrual flow';
     guidance =
       'This day is logged as menstrual flow. Mucus is still recorded but is not interpreted as Peak-type while flow is selected.';
     summaryTone = 'neutral';
@@ -295,19 +370,12 @@ export function buildCurrentCycleSummary(
     guidance =
       'Light bleeding or spotting is noted; combine with your mucus signs for a full picture of the day.';
     summaryTone = 'neutral';
-  } else if (status === 'no_peak') {
-    headline = 'Peak not yet identified';
-    guidance =
-      'Keep charting daily; a clear Peak pattern has not appeared on this cycle yet.';
-    summaryTone = 'caution';
   } else if (phase === 'fertile_unconfirmed_peak') {
-    headline =
-      result.interpretationWarnings.includes('peak_confirmation_incomplete') &&
-      result.peakCandidateIndex !== null
-        ? 'Working toward Peak confirmation'
-        : headlineFromPhase(phase);
+    headline = headlineFromPhase(phase);
     guidance =
-      'Keep noting your clearest fertile sign each day until Peak can be confirmed on the chart.';
+      result.peakCandidateIndex !== null
+        ? 'A Peak-type day has been noted. Continue observing to confirm the pattern.'
+        : 'Fertile signs are present. Continue daily observations for clarity.';
     summaryTone = 'caution';
   } else {
     headline = headlineFromPhase(phase);
@@ -317,9 +385,9 @@ export function buildCurrentCycleSummary(
       guidance =
         'The three days after Peak Day confirm the pattern on your chart.';
     } else if (phase === 'p_plus_1') {
-      guidance = 'Day 1 of 3 after Peak toward confirming the pattern.';
+      guidance = 'Day 1 of 3 after Peak \u2014 continue observing to confirm.';
     } else if (phase === 'p_plus_2') {
-      guidance = 'Day 2 of 3 after Peak toward confirming the pattern.';
+      guidance = 'Day 2 of 3 after Peak \u2014 continue observing to confirm.';
     } else if (phase === 'p_plus_3') {
       guidance = 'Three days past Peak confirm the post-Peak phase.';
       summaryTone = 'positive';
@@ -357,6 +425,27 @@ export function buildCurrentCycleSummary(
     completeness = `${missingCount} days still open in this cycle`;
   }
 
+  const isLowConfidence = confidence.startsWith('Low confidence');
+  const suppressBaseline =
+    focusMissing ||
+    primaryClass === 'menstrual_flow';
+  const baselineContext = suppressBaseline
+    ? null
+    : buildBaselineContext(
+        phase,
+        focusIndex + 1,
+        isLowConfidence,
+        baselineComparison,
+      );
+
+  const compactSupportField = resolveCompactSupportField(
+    isLowConfidence,
+    focusMissing,
+    interpretationNotes,
+    missingCount,
+    baselineContext,
+  );
+
   return {
     cycleDay: focusIndex + 1,
     headline,
@@ -367,5 +456,7 @@ export function buildCurrentCycleSummary(
     summaryTone,
     focusQualification,
     interpretationNotes,
+    compactSupportField,
+    baselineContext,
   };
 }

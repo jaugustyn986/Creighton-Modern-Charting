@@ -11,6 +11,8 @@ export interface CycleComparisonStructured {
   patternVariation: VariationBand;
   priorSampleSize: number;
   completedCyclesTotal: number;
+  avgPeakDay: number | null;
+  avgFertileStartDay: number | null;
 }
 
 export function getPriorCompleted(
@@ -74,6 +76,19 @@ export function buildCycleComparisonStructured(
     lutealVsPrior = lengthBand(current.lutealPhase - mean(priorLuteals), 1);
   }
 
+  const avgPeakDay =
+    priorPeaks.length > 0
+      ? Math.round(mean(priorPeaks))
+      : null;
+
+  const fertileStartDays = priors
+    .filter((c) => c.result.fertileStartIndex !== null)
+    .map((c) => c.result.fertileStartIndex! + 1);
+  const avgFertileStartDay =
+    fertileStartDays.length > 0
+      ? Math.round(mean(fertileStartDays))
+      : null;
+
   return {
     lengthVsPrior,
     peakVsPrior,
@@ -81,6 +96,8 @@ export function buildCycleComparisonStructured(
     patternVariation: variationFromLengths(priorLengths),
     priorSampleSize: priors.length,
     completedCyclesTotal: completedTotal,
+    avgPeakDay,
+    avgFertileStartDay,
   };
 }
 

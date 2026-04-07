@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -28,6 +28,7 @@ import {
 
 interface Props {
   initialEntry?: DailyEntry | null;
+  previousDayEntry?: DailyEntry | null;
   date: string;
   onSave: (entry: DailyEntry) => void;
   onDelete?: () => void;
@@ -95,7 +96,7 @@ const CLASSIFICATION_LABELS: Record<string, { title: string; desc: string; hint:
   },
 };
 
-export function EntryForm({ initialEntry, date, onSave, onDelete }: Props): JSX.Element {
+export function EntryForm({ initialEntry, previousDayEntry, date, onSave, onDelete }: Props): JSX.Element {
   const [missing, setMissing] = useState(initialEntry?.missing ?? false);
   const [bleeding, setBleeding] = useState<BleedingType>(initialEntry?.bleeding ?? 'none');
   const [sensation, setSensation] = useState<Sensation>(initialEntry?.sensation ?? 'dry');
@@ -105,6 +106,28 @@ export function EntryForm({ initialEntry, date, onSave, onDelete }: Props): JSX.
   const [showNotesInfo, setShowNotesInfo] = useState(false);
   const [intercourse, setIntercourse] = useState(initialEntry?.intercourse ?? false);
   const [notes, setNotes] = useState(initialEntry?.notes ?? '');
+
+  const [sameAsYesterday, setSameAsYesterday] = useState(false);
+  const preToggleSnapshot = useRef<{ sensation: Sensation; appearances: Appearance[] } | null>(null);
+
+  const showSameAsYesterday =
+    !missing &&
+    !initialEntry &&
+    previousDayEntry != null &&
+    !previousDayEntry.missing;
+
+  const handleSameAsYesterday = useCallback((on: boolean) => {
+    if (on && previousDayEntry) {
+      preToggleSnapshot.current = { sensation, appearances: [...appearances] };
+      setSensation(previousDayEntry.sensation ?? 'dry');
+      setAppearances(previousDayEntry.appearances ?? []);
+    } else if (!on && preToggleSnapshot.current) {
+      setSensation(preToggleSnapshot.current.sensation);
+      setAppearances(preToggleSnapshot.current.appearances);
+      preToggleSnapshot.current = null;
+    }
+    setSameAsYesterday(on);
+  }, [previousDayEntry, sensation, appearances]);
 
   const rank = useMemo(
     () => (missing ? null : computeMucusRank({ sensation, appearances })),
@@ -183,6 +206,13 @@ export function EntryForm({ initialEntry, date, onSave, onDelete }: Props): JSX.
         <Text style={styles.missingLabel}>Did you observe today?</Text>
         <Switch value={!missing} onValueChange={(v) => setMissing(!v)} />
       </View>
+
+      {showSameAsYesterday ? (
+        <View style={styles.sameAsYesterdayRow}>
+          <Text style={styles.missingLabel}>Same as yesterday?</Text>
+          <Switch value={sameAsYesterday} onValueChange={handleSameAsYesterday} />
+        </View>
+      ) : null}
 
       {missing ? (
         <View style={styles.missingNote}>
@@ -417,6 +447,10 @@ const styles = StyleSheet.create({
   missingRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 16, backgroundColor: BG_MISSING, borderRadius: 10, marginTop: 16,
+  },
+  sameAsYesterdayRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    padding: 16, backgroundColor: BG_MISSING, borderRadius: 10, marginTop: 8,
   },
   missingLabel: { fontSize: 14, fontWeight: '500', color: TEXT_SECONDARY },
   missingNote: { backgroundColor: '#fef3c7', padding: 12, borderRadius: 8, marginTop: 8 },

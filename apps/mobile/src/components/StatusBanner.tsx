@@ -1,11 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import type { CurrentCycleSummary, SummaryTone } from 'core-rules-engine';
+import type { CompactSupportField, CurrentCycleSummary, SummaryTone } from 'core-rules-engine';
 import {
   BG_CARD_GRADIENT_START,
   BANNER_TONE_CAUTION_BG,
   BANNER_TONE_POSITIVE_BG,
-  BORDER_CARD,
   TEXT_PRIMARY,
   TEXT_SECONDARY,
   TEXT_SUBTLE,
@@ -27,12 +26,31 @@ function backgroundForTone(tone: SummaryTone): string {
   }
 }
 
+function resolveSupportLine(
+  field: CompactSupportField,
+  summary: CurrentCycleSummary,
+): string | null {
+  switch (field) {
+    case 'guidance':
+      return summary.guidance;
+    case 'baselineContext':
+      return summary.baselineContext;
+    case 'completeness':
+      return summary.completeness;
+    case 'interpretationNote':
+      return summary.interpretationNotes[0] ?? null;
+    default:
+      return summary.guidance;
+  }
+}
+
 export function StatusBanner({ summary }: Props): JSX.Element {
   const bg = backgroundForTone(summary.summaryTone);
   const { cycleDay } = summary;
-  const hasSupportingContext = summary.supportingContext.trim().length > 0;
-  const notes = summary.interpretationNotes ?? [];
-  const hasNotes = notes.length > 0;
+  const supportLine = resolveSupportLine(summary.compactSupportField, summary);
+  const showCompleteness =
+    summary.compactSupportField !== 'completeness' &&
+    summary.completeness.length > 0;
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
@@ -44,25 +62,12 @@ export function StatusBanner({ summary }: Props): JSX.Element {
       {cycleDay !== null ? (
         <Text style={styles.cycleDay}>Cycle Day {cycleDay}</Text>
       ) : null}
-      <Text
-        style={[
-          styles.completeness,
-          cycleDay === null ? styles.completenessAfterConfidence : null,
-        ]}
-      >
-        {summary.completeness}
-      </Text>
-      {hasSupportingContext ? (
-        <Text style={styles.supporting}>{summary.supportingContext}</Text>
+      {showCompleteness ? (
+        <Text style={styles.completeness}>{summary.completeness}</Text>
       ) : null}
-      {hasNotes
-        ? notes.map((line, i) => (
-            <Text key={`note-${i}`} style={styles.interpretationNote}>
-              {line}
-            </Text>
-          ))
-        : null}
-      <Text style={styles.guidance}>{summary.guidance}</Text>
+      {supportLine ? (
+        <Text style={styles.supportLine}>{supportLine}</Text>
+      ) : null}
     </View>
   );
 }
@@ -95,44 +100,24 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   cycleDay: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '400',
     color: TEXT_SUBTLE,
-    marginTop: 10,
-    lineHeight: 22,
+    marginTop: 6,
+    lineHeight: 18,
   },
   completeness: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '400',
     color: TEXT_SUBTLE,
-    marginTop: 8,
-    lineHeight: 22,
+    marginTop: 2,
+    lineHeight: 18,
   },
-  completenessAfterConfidence: {
-    marginTop: 10,
-  },
-  supporting: {
+  supportLine: {
     fontSize: 14,
     fontWeight: '400',
     color: TEXT_SECONDARY,
     marginTop: 10,
-    lineHeight: 22,
-  },
-  interpretationNote: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: TEXT_SECONDARY,
-    marginTop: 8,
-    lineHeight: 22,
-  },
-  guidance: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: TEXT_SECONDARY,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: BORDER_CARD,
     lineHeight: 22,
   },
 });
