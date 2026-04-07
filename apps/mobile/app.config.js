@@ -22,7 +22,11 @@ module.exports = {
     version: '0.1.0',
     icon: './assets/icon-1024.png',
     orientation: 'portrait',
-    platforms: ['ios'],
+    platforms: ['ios', 'web'],
+    web: {
+      bundler: 'metro',
+      output: 'single',
+    },
     splash: {
       image: './assets/icon-1024.png',
       resizeMode: 'contain',

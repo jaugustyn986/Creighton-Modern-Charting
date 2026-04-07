@@ -45,6 +45,14 @@ When working in this repo, read and follow the guidance in the `skills/` folder.
 - **Expo iOS release** — `skills/expo_release_commands.md`  
   **Reference when building or submitting to TestFlight.** EAS setup, `eas build --platform ios`, `eas submit --platform ios`, build number management, and release workflow. Use with the readiness checklist and App Store skill.
 
+- **Reference-to-code UI workflow** — `skills/ui_panel_workflow.md`  
+  **Reference whenever a screenshot, mockup, or visual description needs to become real UI anywhere in the app** — onboarding panels, calendar screen, entry form, history view, or any component. Covers: interpret reference → find the right file → build with color tokens → verify → iterate. Includes file map, color token table, mock data policy, and anti-patterns.
+
+- **Onboarding image quality** — `skills/onboarding_image_quality.md`  
+  Sharpness, composition, and quality standards for onboarding screens. Never use blurry or upscaled assets; reconstruct in code when possible.
+
 Before **planning** a new feature or flow (without coding), read `skills/product_planning_well_within.md` together with any domain/UX/engine skills the topic touches.
 
 Before changing fertility behavior, the rules engine, or mobile screens, re-read the relevant skill file(s).
+
+Before building or editing any UI component from a visual reference (screenshot, mockup, or description), read `skills/ui_panel_workflow.md`.

@@ -92,7 +92,7 @@ Before each release run, update and follow:
 - **Cycle Detail** — per-cycle mucus chart, fertile timeline, daily log. Export to PDF via share sheet (PDF includes cycle stats and day-by-day table; the mucus chart is in-app only).
 - **Settings** — privacy info, JSON data export, clear all data with confirmation, app version
 - **Help** — charting guide (copy sourced from `core-rules-engine` / `observationEducationCopy.ts`), visual calendar color key with actual cell swatches, onboarding replay
-- **Onboarding** — 4-slide first-launch flow
+- **Onboarding** — 7-slide first-launch flow: brand identity, problem recognition, product positioning (status glossary), current-cycle value, daily entry behavior, long-term patterns, and CTA. No skip button — users complete the flow once.
 
 ## Notes
 - Multiple observations per day are supported; daily rank is max observation rank.
