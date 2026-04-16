@@ -21,6 +21,7 @@ import {
   BORDER_CARD,
   ACCENT_WARM,
   ACCENT_WARM_TINT,
+  BANNER_TONE_CAUTION_BG,
 } from '../theme/colors';
 
 export function AuthScreen(): JSX.Element {
@@ -38,6 +39,7 @@ export function AuthScreen(): JSX.Element {
   const handleSendMagicLink = useCallback(async () => {
     const trimmed = email.trim();
     if (!trimmed) return;
+    auth?.clearAuthCallbackError();
     setSending(true);
     try {
       const { error } = await auth?.signInWithOtp(trimmed) ?? { error: new Error('Not available') };
@@ -54,6 +56,8 @@ export function AuthScreen(): JSX.Element {
     }
   }, [email, auth]);
 
+  const callbackError = auth?.lastAuthCallbackError ?? null;
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -64,6 +68,13 @@ export function AuthScreen(): JSX.Element {
         <Text style={styles.subtitle}>
           We'll send you a link to sign in. No password needed.
         </Text>
+        {callbackError ? (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorTitle}>Couldn't complete sign-in</Text>
+            <Text style={styles.errorMessage}>{callbackError}</Text>
+            <Text style={styles.errorHint}>Send a new link and try again.</Text>
+          </View>
+        ) : null}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -122,4 +133,16 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  errorBanner: {
+    backgroundColor: BANNER_TONE_CAUTION_BG,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER_CARD,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+  },
+  errorTitle: { fontSize: 14, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 4 },
+  errorMessage: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 20 },
+  errorHint: { fontSize: 13, color: TEXT_MUTED, marginTop: 6 },
 });

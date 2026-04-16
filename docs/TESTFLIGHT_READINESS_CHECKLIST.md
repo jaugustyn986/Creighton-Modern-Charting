@@ -238,6 +238,8 @@ Audited By: Cursor Agent
 
 Release notes (this push): magic-link auth callback hardening across query/fragment/code/token_hash callback formats; deep-link + Supabase setup docs clarified for dev/TestFlight/production redirect URLs.
 
+Release notes (next push — magic-link session landing): switched Supabase client session storage from the `expo-sqlite/localStorage` shim to `AsyncStorage` (Supabase's official React Native recommendation) so magic-link sessions persist reliably across app relaunches. Moved deep-link URL handling into `AuthProvider` (fixes a race where the callback fired before `onAuthStateChange` was subscribed). Surfaced any auth-callback failure as a calm banner on the sign-in screen instead of failing silently. Diagnostics before this change: Supabase auth logs confirm magic-link verify returns 303 and server-side `login (implicit)` succeeds — the gap was entirely in app-side session application/persistence.
+
 Commands used (from `apps/mobile`): `npx eas build --platform ios --profile production --non-interactive --no-wait`, then `npx eas submit --platform ios --profile production --non-interactive --id <build-id>`. Preflight: `npm run mobile:preflight:release` hit **expo-doctor** failures (Expo API timeout + Metro warnings); **`npx expo config --type public`** was used as a successful config gate before building.
 
 ---

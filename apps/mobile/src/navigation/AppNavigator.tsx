@@ -1,12 +1,10 @@
 import React, { useCallback, createContext, useContext, useEffect, useState } from 'react';
-import { Linking } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider } from '../context/AuthProvider';
 import { SyncProvider } from '../context/SyncProvider';
-import { createSessionFromUrl } from '../services/auth';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { TimelineScreen } from '../screens/TimelineScreen';
 import { CycleHistoryScreen } from '../screens/CycleHistoryScreen';
@@ -45,17 +43,6 @@ WebBrowser.maybeCompleteAuthSession();
 
 export function AppNavigator(): JSX.Element {
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    Linking.getInitialURL().then((url) => {
-      if (url) void createSessionFromUrl(url);
-    });
-    const sub = Linking.addEventListener('url', (event) => {
-      const url = event?.url;
-      if (url) void createSessionFromUrl(url);
-    });
-    return () => sub.remove();
-  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
