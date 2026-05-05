@@ -51,6 +51,21 @@ When working in this repo, read and follow the guidance in the `skills/` folder.
 - **Onboarding image quality** — `skills/onboarding_image_quality.md`  
   Sharpness, composition, and quality standards for onboarding screens. Never use blurry or upscaled assets; reconstruct in code when possible.
 
+- **App ad creative research** — `C:\Users\JimAugustyn\.cursor\skills\app-ad-creative-research\SKILL.md`  
+  **Reference when researching Instagram or Meta ads, app marketing creative, paid social concepts, growth ideas, or ad image prompts based on the app's interface.** Understand the product first, use comparable ads for patterns rather than copying, and keep claims grounded.
+
+- **Social performance optimizer** — `C:\Users\JimAugustyn\.cursor\skills\social-performance-optimizer\SKILL.md`  
+  **Reference when reviewing published Instagram or Meta post/ad performance, interpreting metrics, improving CTR or engagement, updating creative learnings, or deciding what to post/test next.** Use real metrics when available and keep tests controlled.
+
+- **Instagram organic publishing** — `C:\Users\JimAugustyn\.cursor\skills\instagram-organic-publishing\SKILL.md`  
+  **Reference when preparing, validating, approving, publishing, or reviewing organic Instagram feed posts, carousels, Stories, Reels, captions, hashtags, CTAs, link-in-bio flows, or Composio Instagram publishing workflows for Well Within.** Requires explicit approval before anything goes live.
+
+- **Well Within Instagram research** — `C:\Users\JimAugustyn\.cursor\skills\well-within-instagram-research\SKILL.md`  
+  **Reference when researching successful Instagram posts, updating Well Within social memory, maintaining the Instagram research playbook, adding draft post tests, retiring stale trends, or deciding what organic Instagram post to create next.** Use with `docs/social/INSTAGRAM_RESEARCH_PLAYBOOK.md`, `docs/social/INSTAGRAM_MEMORY.md`, `docs/social/INSTAGRAM_EXPERIMENT_LOG.md`, and `docs/social/INSTAGRAM_DRAFT_QUEUE.md`.
+
+- **Well Within social creative direction** — `C:\Users\JimAugustyn\.cursor\skills\well-within-social-creative-direction\SKILL.md`  
+  **Reference when creating, revising, or judging Instagram visuals, carousel slides, Reel covers, lifestyle imagery, creator-style posts, or social creative direction for Well Within.** Use references and a chosen visual system before generating or exporting images; avoid generic decorative cards.
+
 Before **planning** a new feature or flow (without coding), read `skills/product_planning_well_within.md` together with any domain/UX/engine skills the topic touches.
 
 Before changing fertility behavior, the rules engine, or mobile screens, re-read the relevant skill file(s).
